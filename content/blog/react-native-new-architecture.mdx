@@ -1,0 +1,72 @@
+---
+title: "React Native's New Architecture: what replaced the bridge, and why it matters"
+seoTitle: "React Native New Architecture explained"
+description: What the React Native New Architecture changes, JSI, Turbo Modules, the Fabric renderer and the event loop, based on the official documentation and the 0.76 release announcement.
+date: 2026-09-19
+category: mobile
+tags: [react-native, mobile, architecture, jsi]
+cover: /images/blog/react-native-new-architecture.png
+coverAlt: Before and after diagram of React Native, on the left JavaScript and native code talk through an asynchronous bridge, on the right they talk directly through JSI
+---
+
+For most of its history, React Native connected JavaScript to native code through a component called the bridge. The New Architecture removes that dependency. Since version 0.76 it is the default for every new project, so it is worth understanding what changed. Everything below comes from the official React Native documentation and release announcement.
+
+## Timeline
+
+- The React Native team has been redesigning the core internals since 2018 [1].
+- React Native **0.76**, announced on **October 23, 2024**, enabled the New Architecture by default in all projects [2].
+
+## What the bridge was, and what replaced it
+
+In the old architecture, JavaScript and native code communicated through an asynchronous bridge [1]. The New Architecture removes it and replaces it with the **JavaScript Interface (JSI)**, an interface that allows JavaScript to hold a reference to a C++ object and vice versa [1].
+
+The release post lists two direct benefits of removing the bridge: direct, efficient communication between JavaScript and native code, and faster startup, because the bridge no longer has to be initialised [2]. The bridge code still exists for backward compatibility during migration, and the team plans to remove it completely in the future [2].
+
+## The four parts of the New Architecture
+
+### Turbo Modules: the new native module system
+
+The new Native Module system is a rewrite of how JavaScript and the platform communicate, written entirely in C++ [2]. The announcement lists these capabilities [2]:
+
+- Synchronous access to and from the native runtime
+- Type safety between JavaScript and native code
+- Code sharing across platforms
+- Lazy module loading by default
+
+Lazy loading means a module is loaded into memory only when it is actually needed, not at startup, which keeps startup time low as an app grows [2].
+
+### Codegen: a typed contract
+
+With Codegen, a module defines a strongly typed contract between the JavaScript layer and the native layer [2]. The React Native team notes that cross-boundary type errors are one of the most common sources of crashes in cross-platform apps [2], which is the problem a generated contract addresses.
+
+### Fabric: the new renderer
+
+The native renderer was rewritten as well. According to the release post [2]:
+
+- Updates can be rendered on different threads at different priorities.
+- Layout can be read synchronously and across different threads.
+- The renderer is written in C++ and shared across all platforms.
+
+Together with JSI, this enables synchronous layout: reading a view's size and position without an asynchronous callback [1].
+
+### A defined event loop
+
+The New Architecture implements a well-defined event loop that follows the processing model described in the HTML Standard [2]. That gives React Native the ability to interrupt rendering to handle events, and brings its behaviour closer to the web [2]. It also supports concurrent rendering and the features that shipped in React 18 and later [1].
+
+## Migrating existing apps
+
+When an app upgrades, it runs on the New Architecture with an automatic interoperability layer for libraries that still target the old one [2]. The team expects most apps to adopt 0.76 with the same effort as any other release, while noting known limitations: the interop layer does not support accessing custom Shadow Nodes or concurrent features [2].
+
+## Summary
+
+- Since React Native 0.76 (October 2024), the New Architecture is the default [2].
+- JSI replaces the asynchronous bridge with direct references between JavaScript and C++ [1].
+- Turbo Modules bring synchronous, typed, lazily loaded native modules [2].
+- Fabric renders on multiple threads with priorities and allows synchronous layout reads [2].
+
+For the web side of performance, see [what fixing LCP on this site taught me](/blog/core-web-vitals-lcp).
+
+## Sources
+
+1. React Native, “About the New Architecture”, https://reactnative.dev/architecture/landing-page
+2. React Native blog, “New Architecture is here” (October 23, 2024), https://reactnative.dev/blog/2024/10/23/the-new-architecture-is-here

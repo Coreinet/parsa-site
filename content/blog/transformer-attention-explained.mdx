@@ -1,0 +1,81 @@
+---
+title: "The Transformer, from the original paper: attention explained for developers"
+seoTitle: "Transformer attention, from the paper"
+description: How scaled dot-product attention, multi-head attention and positional encoding work, with the formulas and settings taken directly from "Attention Is All You Need".
+date: 2026-09-19
+category: ai
+tags: [ai, transformer, attention, deep-learning, research]
+cover: /images/blog/transformer-attention-explained.png
+coverAlt: Diagram of scaled dot-product attention, queries and keys are multiplied, scaled by the square root of d_k, passed through softmax and multiplied with values
+---
+
+Most large language models in use today are built on one architecture: the Transformer. It was introduced in a 2017 paper that is short, precise and still the best place to learn how it works. This post walks through its central mechanism, attention, using the paper's own formulas and numbers.
+
+## The paper
+
+“Attention Is All You Need” was written by Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser and Illia Polosukhin, and first posted on June 12, 2017 [1].
+
+Its central claim is in the abstract: the Transformer is based solely on attention mechanisms, dispensing with recurrence and convolutions entirely [1]. Before it, the leading sequence models processed text step by step with recurrent networks. Attention lets every position look at every other position directly.
+
+## Scaled dot-product attention
+
+Attention takes three matrices: queries **Q**, keys **K** and values **V**. The paper defines it as [2]:
+
+```text
+Attention(Q, K, V) = softmax( Q·Kᵀ / √d_k ) · V
+```
+
+Read it from the inside out:
+
+1. **Q·Kᵀ** scores how well each query matches each key, using dot products.
+2. **÷ √d_k** scales the scores, where `d_k` is the dimension of the keys.
+3. **softmax** turns each row of scores into weights that are positive and sum to 1.
+4. **· V** takes a weighted average of the values using those weights.
+
+### Why divide by √d_k
+
+The paper explains that for large `d_k`, dot products grow large in magnitude and push the softmax into regions where it has extremely small gradients [2]. If the components of queries and keys are independent with mean 0 and variance 1, their dot product has mean 0 and variance `d_k` [2]. Dividing by `√d_k` brings the variance back to 1, which keeps training stable.
+
+## Multi-head attention
+
+One attention function looks at the input one way. Multi-head attention runs several in parallel, each with its own learned projections, and concatenates the results [2]:
+
+```text
+MultiHead(Q, K, V) = Concat(head₁, …, head_h) · Wᴼ
+where headᵢ = Attention(Q·Wᵢᵠ, K·Wᵢᴷ, V·Wᵢⱽ)
+```
+
+The base model in the paper uses **h = 8** heads, with **d_model = 512** and **d_k = d_v = d_model / h = 64** [2]. Because each head works in a smaller dimension, the total cost is similar to a single head with full dimensionality [2].
+
+## Positional encoding
+
+Attention on its own has no sense of order: it treats the input as a set. The paper adds a positional encoding to each input embedding, using sine and cosine functions of different frequencies [2]:
+
+```text
+PE(pos, 2i)   = sin( pos / 10000^(2i / d_model) )
+PE(pos, 2i+1) = cos( pos / 10000^(2i / d_model) )
+```
+
+Here `pos` is the position in the sequence and `i` is the dimension.
+
+## The full model, in numbers
+
+- The encoder and the decoder are each a stack of **N = 6** identical layers [2].
+- On the WMT 2014 English-to-German translation task, the model reached **28.4 BLEU**, and **41.8 BLEU** on English-to-French [1].
+- The 41.8 BLEU English-to-French result came after training for **3.5 days on eight GPUs** [1].
+
+## Why it matters for developers
+
+Two consequences of this design shape how we build with language models today. Because every position attends to every other, the cost of attention grows with the square of the sequence length, which is why context windows are a real limit. And because attention weighs all positions at once, what you put in the context, and where, affects the output. I wrote about the practical side of that in [Retrieval-augmented generation](/blog/retrieval-augmented-generation).
+
+## Summary
+
+- The Transformer replaces recurrence and convolutions with attention [1].
+- Attention is `softmax(Q·Kᵀ / √d_k) · V`; the `√d_k` keeps the softmax out of low-gradient regions [2].
+- The base model uses 8 heads of dimension 64, `d_model = 512`, and 6 layers each in the encoder and decoder [2].
+- Sinusoidal positional encodings give the model a sense of order [2].
+
+## Sources
+
+1. Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., Polosukhin, I. “Attention Is All You Need.” 2017. Abstract: https://arxiv.org/abs/1706.03762
+2. The same paper, full text (sections 3.2 and 3.5): https://arxiv.org/html/1706.03762v7

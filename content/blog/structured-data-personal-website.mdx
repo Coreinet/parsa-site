@@ -1,0 +1,89 @@
+---
+title: "Structured data for a personal website: Person, ProfilePage and sameAs"
+seoTitle: "Structured data for a personal website"
+description: How to describe yourself to search engines with JSON-LD, what Google's ProfilePage documentation asks for, and the rules that keep structured data honest.
+date: 2026-09-19
+category: web
+tags: [seo, structured-data, json-ld, schema-org]
+cover: /images/blog/structured-data-personal-website.png
+coverAlt: Diagram of a JSON-LD graph where the WebSite, ProfilePage and BlogPosting nodes all point to one Person node, which links to GitHub, LinkedIn and Instagram through sameAs
+---
+
+A personal website has one main subject: the person. Structured data is a way to say that explicitly, in a format search engines can read, instead of leaving them to infer it from the page. This post walks through the markup this site uses and the documentation behind each choice.
+
+## Why JSON-LD
+
+Google Search supports three formats for structured data: JSON-LD, Microdata and RDFa. Google recommends JSON-LD where the site's setup allows it, because it is the easiest to implement and maintain at scale [1]. JSON-LD lives in a `<script type="application/ld+json">` block, separate from the HTML the reader sees, which keeps the markup out of the design.
+
+## ProfilePage: the page about a person
+
+Google's ProfilePage documentation describes the markup as meant for sites where creators, people or organizations, share first-hand perspectives. Its list of valid uses includes "About Me" pages on blogs and author pages [2].
+
+ProfilePage has one required property, `mainEntity`, which must be a `Person` or an `Organization` [2]. Recommended properties for that person include `name`, `alternateName`, `description`, `identifier`, `image` and `sameAs` [2].
+
+On this site, the ProfilePage is the [About page](/about), and its main entity is me.
+
+## sameAs: connecting your profiles
+
+Schema.org defines `sameAs` as the "URL of a reference Web page that unambiguously indicates the item's identity", for example a Wikipedia page, a Wikidata entry or an official website [3]. Google describes it for ProfilePage as "the URL to other external profiles or home pages for the profile" [2].
+
+For a developer, that usually means the profiles you actually control, such as GitHub and LinkedIn. Only list profiles that are really yours. The point of `sameAs` is identity, and a wrong link weakens it.
+
+## One Person, referenced everywhere
+
+The most useful pattern I found is to define the person once, with a stable `@id`, and have every other node point to it:
+
+```json title="Simplified from this site's JSON-LD"
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://example.com/#person",
+      "name": "Parsa Alizadeh",
+      "jobTitle": "Software Developer",
+      "sameAs": [
+        "https://github.com/Coreinet",
+        "https://www.linkedin.com/in/parsa-alizadeh-123237240/"
+      ]
+    },
+    {
+      "@type": "ProfilePage",
+      "mainEntity": { "@id": "https://example.com/#person" }
+    }
+  ]
+}
+```
+
+The WebSite node names the same `@id` as its publisher, and every blog post names it as the author. The result is one consistent entity instead of several unconnected descriptions of the same person.
+
+## The rules that keep it honest
+
+Google's general structured data guidelines are short and strict [4]:
+
+- Structured data must be a true representation of the page content.
+- Do not mark up content that is not visible to readers of the page.
+- Do not use it to deceive or mislead, or to impersonate anyone.
+
+<Callout type="warning">
+That second rule caught a real mistake on this site. I had listed alternate spellings of my name in the Person markup that appeared nowhere on the page. There are two honest fixes: show them on the page, or remove them from the markup. I removed them, so the markup now says only what a reader can see.
+</Callout>
+
+It is also worth knowing what structured data does not do. Google does not guarantee that it will show up in search results, even when the markup is correct [4]. Correct markup makes a page eligible for richer results. It is not a ranking switch.
+
+## A checklist for your own site
+
+- Use JSON-LD [1].
+- Mark the page that is about you as a ProfilePage with a Person as `mainEntity` [2].
+- Give the Person a stable `@id` and reference it from the rest of the graph.
+- Add `sameAs` links only to profiles that are really yours [3].
+- Make sure every value in the markup is visible on the page [4].
+
+For the performance side of the same site, see [what fixing LCP taught me](/blog/core-web-vitals-lcp).
+
+## Sources
+
+1. Google Search Central, “Introduction to structured data markup in Google Search”, https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data
+2. Google Search Central, “Profile page (ProfilePage) structured data”, https://developers.google.com/search/docs/appearance/structured-data/profile-page
+3. Schema.org, “sameAs”, https://schema.org/sameAs
+4. Google Search Central, “General structured data guidelines”, https://developers.google.com/search/docs/appearance/structured-data/sd-policies

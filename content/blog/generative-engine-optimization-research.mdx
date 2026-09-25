@@ -1,0 +1,76 @@
+---
+title: "Generative Engine Optimization: what the research actually measured"
+seoTitle: "GEO: what the research measured"
+description: A close reading of the 2023 paper that introduced Generative Engine Optimization, which methods improved visibility in AI-generated answers, which did not, and what the results do and do not show.
+date: 2026-09-19
+category: web
+tags: [geo, seo, ai, search, research]
+cover: /images/blog/generative-engine-optimization-research.png
+coverAlt: Bar chart of results from the GEO paper, quotation addition 27.8, statistics addition 25.9 and cite sources 24.9 compared with keyword stuffing 17.8 on position-adjusted word count
+---
+
+Search is no longer only a list of links. More and more questions are answered by systems that read several sources and write one response. Writing for those systems now has a name, Generative Engine Optimization, and, unusually for a marketing term, it started as a research paper. This post summarises what that paper tested and found.
+
+## Definitions
+
+The paper is “GEO: Generative Engine Optimization” by Pranjal Aggarwal, Vishvak Murahari, Tanmay Rajpurohit, Ashwin Kalyan, Karthik Narasimhan and Ameet Deshpande, presented at KDD 2024 [1].
+
+- **Generative engine:** a search engine that uses generative models to gather and summarise information to answer user queries [1].
+- **Generative Engine Optimization (GEO):** in the authors' words, a paradigm to help content creators improve the visibility of their content in generative engine responses [1].
+
+To evaluate it, the authors built **GEO-bench**, a large benchmark of user queries across multiple domains [1].
+
+## What was tested
+
+The paper evaluates nine ways of rewriting a source's content [2]:
+
+| Method | The idea |
+| --- | --- |
+| Cite Sources | Add citations to credible sources |
+| Quotation Addition | Add relevant quotations |
+| Statistics Addition | Add quantitative statistics |
+| Fluency Optimization | Improve how fluently the text reads |
+| Easy-to-Understand | Simplify the language |
+| Authoritative | Make the tone more persuasive and authoritative |
+| Technical Terms | Add technical terminology |
+| Unique Words | Add unusual words |
+| Keyword Stuffing | Add more query keywords, as in classic SEO |
+
+## What worked
+
+The abstract reports that GEO methods can increase visibility in generative engine responses by up to 40% [1].
+
+The three strongest methods in the paper's main results were **Quotation Addition**, **Statistics Addition** and **Cite Sources** [2]. On the paper's position-adjusted word count metric they scored 27.8, 25.9 and 24.9, while **Keyword Stuffing**, among the weakest, scored 17.8 [2]. The authors write that methods widely used for search engine optimization offered "little to no improvement" on generative engine responses [2].
+
+A second result is about who benefits. For sources ranked fifth in a traditional search results page, the Cite Sources method increased visibility by 115.1%, while the visibility of the top-ranked source decreased by 30.3% on average [2]. In other words, adding evidence helped the sources that were not already winning.
+
+## What the results do not show
+
+It is easy to over-read a result like this, so the limits matter as much as the headline:
+
+- **It depends on the domain.** The authors state that the efficacy of the strategies varies across domains [1]. There is no single recipe.
+- **It is a benchmark result.** The measurements come from the paper's own benchmark and evaluation setup [1], not from every commercial AI search product.
+- **Visibility is not accuracy.** The paper measures how visible a source is in a generated answer. It does not claim the answer is more correct.
+
+## How I apply it on this site
+
+The encouraging part is that the methods that worked are the same things that make writing trustworthy for people:
+
+- **Every article ends with numbered sources**, and claims point to them inline, like [1] above.
+- **Numbers come from the source.** When I quote a threshold or a result, it is the figure the source gives, with the source linked.
+- **Terms are defined before they are used**, as in the Definitions section of this post.
+- **No keyword stuffing.** The paper found it does not help [2], and it makes text worse to read.
+
+The site also describes its author with structured data, which I covered in [Structured data for a personal website](/blog/structured-data-personal-website).
+
+## Summary
+
+- GEO was introduced by Aggarwal et al. at KDD 2024 [1].
+- Adding quotations, statistics and citations improved visibility the most; keyword stuffing was among the weakest [2].
+- Lower-ranked sources gained the most from citing sources [2].
+- Results vary by domain, so treat them as evidence, not guarantees [1].
+
+## Sources
+
+1. Aggarwal, P., Murahari, V., Rajpurohit, T., Kalyan, A., Narasimhan, K., Deshpande, A. “GEO: Generative Engine Optimization.” KDD 2024. Abstract: https://arxiv.org/abs/2311.09735
+2. The same paper, full text (methods and results): https://arxiv.org/html/2311.09735

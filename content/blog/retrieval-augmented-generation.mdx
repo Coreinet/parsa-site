@@ -1,0 +1,66 @@
+---
+title: "Retrieval-augmented generation: from the original paper to a working pipeline"
+seoTitle: "RAG explained: from paper to pipeline"
+description: What RAG is according to the 2020 paper that named it, the parts of a practical pipeline, and what research says about where to put retrieved text in the prompt.
+date: 2026-09-19
+category: ai
+tags: [ai, llm, rag, retrieval]
+cover: /images/blog/retrieval-augmented-generation.png
+coverAlt: Pipeline diagram of retrieval-augmented generation, a question goes to a retriever that searches an index of documents, and the top passages are passed with the question to a language model that writes the answer
+---
+
+Large language models answer from what they absorbed during training. That knowledge can be outdated, missing, or impossible to trace back to a source. Retrieval-augmented generation, usually shortened to RAG, is the most common way to give a model the right information at the moment it answers. This post starts with the paper that introduced the term and then describes the pipeline as it is usually built.
+
+## Where the name comes from
+
+The term comes from “Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks” by Patrick Lewis and colleagues, published at NeurIPS 2020 [1].
+
+The paper describes two kinds of memory [1]:
+
+- **Parametric memory:** knowledge stored in the weights of a pre-trained sequence-to-sequence model.
+- **Non-parametric memory:** a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.
+
+RAG combines the two. The retriever finds relevant passages, and the generator writes its output conditioned on them.
+
+The paper compares two formulations [1]. One conditions on the same retrieved passages for the whole generated sequence (RAG-Sequence). The other can use different passages for each token (RAG-Token).
+
+The authors report that RAG models generated more specific, diverse and factual language than a parametric-only baseline, and set the state of the art on several open-domain question answering tasks [1].
+
+## The pipeline, step by step
+
+Most RAG systems built today follow the same shape as the paper, with an external index in place of Wikipedia:
+
+1. **Split** the source documents into passages, often called chunks.
+2. **Embed** each chunk with an embedding model, which turns text into a vector.
+3. **Index** the vectors so that similar ones can be found quickly.
+4. **Retrieve** the chunks whose vectors are closest to the embedded question.
+5. **Generate** the answer with a language model, giving it the question together with the retrieved chunks.
+
+Because the answer is built from specific passages, the system can show which ones it used. That is often the main reason to build RAG at all: answers that can be checked.
+
+## Where the retrieved text goes matters
+
+Giving a model more context is not automatically better. In “Lost in the Middle”, Nelson F. Liu and colleagues found that model performance was often highest when the relevant information appeared at the beginning or the end of the input, and dropped significantly when it was in the middle of a long context [2]. They observed this even for models designed for long contexts [2].
+
+Two practical consequences follow:
+
+- Retrieve fewer, better passages rather than as many as the context window allows.
+- Put the most relevant passages where the model is most likely to use them, at the start or the end of the context.
+
+<Callout type="note">
+Retrieval quality sets the ceiling. If the right passage is never retrieved, no prompt can make the model use it. Measure retrieval on its own before tuning the generation step.
+</Callout>
+
+## Summary
+
+- RAG pairs a retriever over an external index with a generator that writes from what was retrieved [1].
+- The practical pipeline is split, embed, index, retrieve, generate.
+- Position matters: relevant text at the start or end of the context is used more reliably than text in the middle [2].
+- The main benefit is answers grounded in sources you can show.
+
+On a different subject, if you are publishing technical writing like this under your own name, it helps to [describe yourself to search engines with structured data](/blog/structured-data-personal-website).
+
+## Sources
+
+1. Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., Küttler, H., Lewis, M., Yih, W., Rocktäschel, T., Riedel, S., Kiela, D. “Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.” NeurIPS 2020. https://arxiv.org/abs/2005.11401
+2. Liu, N. F., Lin, K., Hewitt, J., Paranjape, A., Bevilacqua, M., Petroni, F., Liang, P. “Lost in the Middle: How Language Models Use Long Contexts.” 2023. https://arxiv.org/abs/2307.03172

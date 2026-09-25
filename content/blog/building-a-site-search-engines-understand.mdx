@@ -1,0 +1,57 @@
+---
+title: "Building a personal website that search engines and AI can understand"
+seoTitle: "A website search engines and AI can understand"
+description: A first-hand walkthrough of how this site states who it is about, how it connects articles and projects to one identity, and what the published guidance says about each choice.
+date: 2026-09-19
+category: web
+tags: [seo, geo, structured-data, personal-website]
+cover: /images/blog/building-a-site-search-engines-understand.png
+coverAlt: Diagram of a personal website where the home page, profile page, articles, projects and topic pages all point to one person, Parsa Alizadeh, who links out to GitHub, LinkedIn and Instagram
+---
+
+A search engine or an AI answer engine reading a personal website has to answer three questions: who is this about, what do they work on, and can the claims be trusted? This article describes how this site answers them, choice by choice, and links each choice to the guidance behind it. It is the starting point for the topic guide on [search and AI discoverability](/topics/search-discoverability).
+
+## 1. One name, stated plainly
+
+The site is about one person, Parsa Alizadeh, and uses that exact name everywhere: the page titles, the main heading of the home page, the profile page, every article byline and the structured data. Using several spellings in different places makes it harder to tell whether they refer to the same person.
+
+The main heading of the home page is the name itself. During development, an animation effect made that heading read as a repeated, run-together string to anything that parsed the page, so the heading was changed to contain exactly one copy of the name.
+
+## 2. A profile page that describes the person
+
+The [About page](/about) is the page about me. It says what I do, the fields I work in, the tools I use, the languages I speak, and where my other profiles are. Google's documentation lists "About Me" pages on blogs among the valid uses of ProfilePage structured data [1], so that page is marked as a ProfilePage whose main entity is a Person.
+
+## 3. One identity in the structured data
+
+Every page describes the same Person with the same identifier. The website names that Person as its publisher, every article names it as the author, and every project names it as the creator. The Person lists my GitHub, LinkedIn and Instagram profiles in `sameAs`, which Schema.org defines as a URL that unambiguously indicates the item's identity [2]. I explain the markup in detail in [Structured data for a personal website](/blog/structured-data-personal-website).
+
+Google's guidelines require that structured data be a true representation of the page and not describe content readers cannot see [3]. So every value in the markup, from the job title to the languages, is also written on a visible page.
+
+## 4. Claims backed by evidence
+
+A list of skills is easy to write and hard to trust. On this site, each project page links to the live product, so anyone can check that it exists, and tools in the [stack section](/#stack) link to the projects that use them. My public source code is on GitHub, which is listed as one of my profiles.
+
+The same rule applies to content I did not write from experience. Placeholder text used while designing the site is excluded from the production build, so it can never be published as a fact about me.
+
+## 5. Articles that cite their sources
+
+Every article ends with numbered sources, and claims point to them inline. That is good practice for readers, and it also matches research on generative engines: in the GEO paper by Aggarwal and colleagues, adding citations, quotations and statistics were among the most effective ways to increase a source's visibility in AI-generated answers, while keyword stuffing was among the weakest [4]. I summarised that paper in [what the GEO research measured](/blog/generative-engine-optimization-research).
+
+## 6. Topics instead of isolated posts
+
+Articles are grouped into topic guides, each with a short definition, one article to start with, deeper articles, and related projects. Every article links back to its guide and to its siblings. This makes the relationship between subjects explicit instead of leaving it to be inferred from keywords.
+
+## 7. A fast, accessible page
+
+Understanding a page starts with loading it. The site is generated as static HTML, and I measured and improved its Largest Contentful Paint, as described in [Core Web Vitals and fixing LCP](/blog/core-web-vitals-lcp).
+
+## What this does not do
+
+None of this guarantees a ranking or a citation. Google states that it does not guarantee structured data will appear in results, even when it is correct [3], and the GEO paper reports that the effect of its methods varies by domain [4]. What these choices do is remove ambiguity: they make it easy for any system, and any person, to see who the site is about and to check what it says.
+
+## Sources
+
+1. Google Search Central, “Profile page (ProfilePage) structured data”, https://developers.google.com/search/docs/appearance/structured-data/profile-page
+2. Schema.org, “sameAs”, https://schema.org/sameAs
+3. Google Search Central, “General structured data guidelines”, https://developers.google.com/search/docs/appearance/structured-data/sd-policies
+4. Aggarwal, P., et al. “GEO: Generative Engine Optimization.” KDD 2024. https://arxiv.org/abs/2311.09735

@@ -1,0 +1,76 @@
+---
+title: "How vector search finds neighbours fast: embeddings, similarity and HNSW"
+seoTitle: "Vector search and HNSW explained"
+description: Why exact nearest-neighbour search does not scale, what approximate search trades away, and how the HNSW graph from Malkov and Yashunin's paper finds close vectors quickly.
+date: 2026-09-19
+category: ai
+tags: [ai, vector-search, hnsw, embeddings, research]
+cover: /images/blog/vector-search-hnsw.png
+coverAlt: Diagram of a hierarchical navigable small world graph with three layers, a search enters at the sparse top layer and descends to the dense bottom layer to reach the nearest neighbour
+---
+
+Every retrieval-augmented AI system has the same question at its core: given a query vector, which stored vectors are closest to it? Answering that quickly, across millions of vectors, is the job of a vector index. This post explains the problem and one of the most widely used solutions, the Hierarchical Navigable Small World graph, or HNSW.
+
+## Embeddings and similarity
+
+An **embedding** is a list of numbers, a vector, that represents a piece of text, an image or another item. Embedding models are trained so that items with similar meaning end up with vectors that are close together.
+
+"Close" needs a definition. A common one is **cosine similarity**, the cosine of the angle between two vectors:
+
+```text
+cosine(a, b) = (a · b) / (‖a‖ · ‖b‖)
+```
+
+It ranges from −1 to 1, and it is 1 when the vectors point in the same direction. For vectors normalised to length 1, cosine similarity equals the dot product, which is why many systems normalise embeddings once and then compare them with dot products.
+
+## Why exact search does not scale
+
+The exact answer is simple to compute: compare the query with every stored vector and keep the best. That costs one comparison per stored vector for every query, so the work grows linearly with the size of the collection. At millions of vectors and many queries per second, that becomes the bottleneck.
+
+**Approximate nearest neighbour** (ANN) search accepts a trade: it may occasionally miss a true nearest neighbour in exchange for answering much faster. The quality of that trade is usually reported as **recall**, the share of true nearest neighbours the index actually returns.
+
+## HNSW, from the paper
+
+HNSW was introduced by Yu. A. Malkov and D. A. Yashunin in “Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs”, first posted on March 30, 2016 [1].
+
+The paper describes it as a multi-layer structure made of a hierarchical set of proximity graphs, one per layer, for nested subsets of the stored elements [1]. Two ideas make it work.
+
+### 1. Random layers, like a skip list
+
+When an element is inserted, the maximum layer it appears in is chosen randomly with an exponentially decaying probability distribution [1]. Most elements live only in the bottom layer; a few reach the higher, sparser layers.
+
+The authors make the analogy explicit: HNSW “can be seen as an extension of the probabilistic skip list structure with proximity graphs instead of the linked lists” [2].
+
+### 2. Search from the top down
+
+A search starts in the upper layer [1]. There, links are long, so a greedy walk covers large distances quickly. When it cannot get closer, it drops one layer and continues with shorter links, until it reaches the bottom layer, which contains every element. The paper reports that starting from the upper layer together with this scale separation allows a logarithmic complexity scaling [1].
+
+## The parameters you will meet
+
+Libraries that implement HNSW expose parameters named in the paper's insertion algorithm [2]:
+
+| Parameter | Meaning in the paper |
+| --- | --- |
+| `M` | Number of connections established for each new element |
+| `Mmax` | Maximum number of connections for each element per layer |
+| `efConstruction` | Size of the dynamic candidate list while building the index |
+| `ef` | Size of the dynamic candidate list while searching; controls search quality |
+| `mL` | Normalisation factor for choosing an element's maximum layer |
+
+For `mL`, the paper gives a simple choice: `1 / ln(M)` [2]. The quality of a search is controlled by `ef` [2]: a larger candidate list explores more of the graph, which generally raises recall and costs time. That is why these values are usually tuned against a recall target rather than set once.
+
+## Where this fits
+
+Vector search is the "retrieve" step of retrieval-augmented generation. If the index misses the right passage, the language model never sees it. I covered the rest of that pipeline in [Retrieval-augmented generation](/blog/retrieval-augmented-generation), and the model side in [the Transformer, from the original paper](/blog/transformer-attention-explained).
+
+## Summary
+
+- Embeddings turn items into vectors; similarity, often cosine, measures closeness.
+- Exact search compares against every vector, so its cost grows linearly with the collection.
+- HNSW builds layered proximity graphs with randomly assigned layers, like a skip list, and searches from the sparse top layer down [1][2].
+- `ef` controls search quality; tune it, with `M` and `efConstruction`, against a recall target [2].
+
+## Sources
+
+1. Malkov, Yu. A., Yashunin, D. A. “Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs.” 2016. Abstract: https://arxiv.org/abs/1603.09320
+2. The same paper, full text (sections on the algorithm and Algorithm 1): https://arxiv.org/pdf/1603.09320

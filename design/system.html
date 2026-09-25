@@ -1,0 +1,1012 @@
+<title>Parsa Alizadeh — Source &amp; Signal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F1F2EE; --paper-2:#E7E9E3; --surface:#FAFAF7; --ink:#121416; --ink-2:#4A4F55; --ink-3:#7C8288;
+  --line:#D5D8D1; --line-strong:#B9BDB5;
+  --signal:#2A36E8; --signal-ink:#FFFFFF; --signal-soft:#DDE0FF;
+  --ok:#1E7F4F; --warn:#9A6400; --err:#C0342B; --err-soft:#F8E1DE;
+  --f-display:"Familjen Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-prose:"Newsreader",Georgia,"Times New Roman",serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r-xs:2px; --r-sm:6px; --r-md:10px; --r-lg:16px; --r-pill:999px;
+  --ease-out:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F1112; --paper-2:#16191B; --surface:#1A1D20; --ink:#E9EBE6; --ink-2:#A9AEB2; --ink-3:#737980;
+  --line:#2A2E32; --line-strong:#3A3F44;
+  --signal:#8391FF; --signal-ink:#0B0D1F; --signal-soft:#1E2350;
+  --ok:#5CC98E; --warn:#E3B04B; --err:#FF7A6E; --err-soft:#3A1B18;
+}}
+:root[data-theme="dark"]{
+  --paper:#0F1112; --paper-2:#16191B; --surface:#1A1D20; --ink:#E9EBE6; --ink-2:#A9AEB2; --ink-3:#737980;
+  --line:#2A2E32; --line-strong:#3A3F44;
+  --signal:#8391FF; --signal-ink:#0B0D1F; --signal-soft:#1E2350;
+  --ok:#5CC98E; --warn:#E3B04B; --err:#FF7A6E; --err-soft:#3A1B18;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:16px/1.55 var(--f-display);padding-inline:clamp(16px,4vw,48px);padding-block:0 80px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin-inline:auto}
+a{color:var(--signal)}
+:focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:var(--r-xs)}
+.mono{font-family:var(--f-mono);font-size:12px;letter-spacing:.02em}
+.path{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);letter-spacing:.02em}
+.path b{color:var(--signal);font-weight:500}
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;margin:0}
+h2{font-size:clamp(28px,4vw,40px);font-weight:650;letter-spacing:-.025em;line-height:1.05}
+h3{font-size:20px;font-weight:600;letter-spacing:-.01em}
+h4{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2)}
+p{margin:0;max-width:66ch;color:var(--ink-2)}
+section{padding-block:72px;border-top:1px solid var(--line);display:grid;gap:32px}
+.sec-head{display:grid;gap:10px}
+.lede{font-size:18px;color:var(--ink-2)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:20px;display:grid;gap:12px;align-content:start}
+.note{font-size:14px;color:var(--ink-2)}
+.note code,.panel code,td code,li code{font-family:var(--f-mono);font-size:.86em;background:var(--paper-2);padding:1px 5px;border-radius:var(--r-xs);color:var(--ink)}
+.clean{margin:0;padding-left:18px;display:grid;gap:6px;color:var(--ink-2);font-size:15px;max-width:72ch}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+tr:last-child td{border-bottom:0}
+td{color:var(--ink-2)} td:first-child{color:var(--ink);font-weight:500;white-space:nowrap}
+pre{margin:0;background:#0F1112;color:#DADDD6;border-radius:var(--r-md);padding:18px 20px;overflow-x:auto;font:12.5px/1.65 var(--f-mono);border:1px solid var(--line)}
+pre .c{color:#7A8087} pre .k{color:#9AA4FF} pre .s{color:#B9D88A}
+
+/* ---------- masthead ---------- */
+.mast{padding-block:40px 64px;display:grid;gap:40px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.mark{display:flex;align-items:center;gap:10px;font-weight:600}
+.mono-mark{width:34px;height:34px;display:grid;place-items:center;border:1.5px solid var(--ink);border-radius:var(--r-sm);font:600 13px/1 var(--f-mono);position:relative}
+.mono-mark::after{content:"";position:absolute;right:-4px;bottom:-4px;width:7px;height:7px;background:var(--signal);border-radius:1px}
+.hero-name{font-size:clamp(56px,13vw,176px);font-weight:700;letter-spacing:-.055em;line-height:.84}
+.hero-name span{display:block}
+.hero-name .last{padding-left:.42em;color:transparent;-webkit-text-stroke:1.5px var(--ink)}
+.hero-row{display:grid;gap:28px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:end}
+.status{display:inline-flex;gap:8px;align-items:center;font:12px var(--f-mono);color:var(--ink-2);border:1px solid var(--line);padding:6px 10px;border-radius:var(--r-pill);background:var(--surface);width:max-content;max-width:100%}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 22%,transparent)}
+.toc{display:flex;flex-wrap:wrap;gap:6px 18px;font:12px var(--f-mono)}
+.toc a{color:var(--ink-2);text-decoration:none}
+.toc a:hover{color:var(--signal)}
+.pillars{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr))}
+.pillar{border-top:2px solid var(--ink);padding-top:14px;display:grid;gap:6px}
+.pillar strong{font-size:17px}
+</style>
+
+<div class="wrap">
+<header class="mast">
+  <div class="topbar">
+    <div class="mark"><div class="mono-mark">PA</div><span>Parsa Alizadeh</span></div>
+    <div class="path">identity &amp; interface system · <b>v1.0</b> · 2026-09-19</div>
+  </div>
+  <h1 class="hero-name"><span>Parsa</span><span class="last">Alizadeh</span></h1>
+  <div class="hero-row">
+    <p class="lede">The complete UI/UX system for Parsa's personal site: brand concept, tokens, components, nine page blueprints, responsive rules, motion, and a build guide for Next.js, React, TypeScript, Tailwind and Three.js.</p>
+    <div style="display:grid;gap:14px;justify-items:start">
+      <span class="status"><span class="dot"></span>This page follows your light/dark setting. Both themes are specified.</span>
+      <nav class="toc" aria-label="Contents">
+        <a href="#concept">concept</a><a href="#color">color</a><a href="#type">type</a><a href="#space">space</a><a href="#components">components</a><a href="#pages">pages</a><a href="#arch">architecture</a><a href="#responsive">responsive</a><a href="#motion">motion</a><a href="#build">build</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<section id="concept">
+  <div class="sec-head">
+    <span class="path">/<b>concept</b></span>
+    <h2>Source &amp; Signal</h2>
+    <p class="lede">Most developer portfolios are a dark page with a neon accent and a grid of cards. This one reads like a well-kept engineering notebook: calm paper-grey ground, precise ink, and one ultramarine “signal” color that means <em>this is live, clickable, or important</em>. Nowhere else.</p>
+  </div>
+  <div class="pillars">
+    <div class="pillar"><strong>The name is the logo</strong><p class="note">“Parsa” in solid ink, “Alizadeh” as an outline offset to the right, the way a line is indented in code. That typographic lockup is the brand; the <code>PA</code> monogram with its signal-colored corner is the short form.</p></div>
+    <div class="pillar"><strong>Routes as labels</strong><p class="note">Every section is labeled with its real path in mono (<code>/work</code>, <code>/log/…</code>). It tells you where you are and it feels like a developer made it. No decorative 01/02/03.</p></div>
+    <div class="pillar"><strong>One 3D moment: the Lattice</strong><p class="note">A single Three.js object on the home hero: a slowly turning wireframe lattice of points that leans toward the cursor. No 3D anywhere else. On phones and with reduced motion it becomes a static rendered poster.</p></div>
+    <div class="pillar"><strong>Writing as publication</strong><p class="note">The blog is <strong>The Log</strong>: serif body text, notes in the margin, footnotes and real code blocks. It reads like a technical journal, not a card grid.</p></div>
+  </div>
+</section>
+<style>
+.sw{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr))}
+.chip{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
+.chip i{display:block;height:64px;border-bottom:1px solid var(--line)}
+.chip div{padding:10px 12px;display:grid;gap:2px}
+.chip b{font-size:14px;font-weight:600}
+.chip span{font:11px var(--f-mono);color:var(--ink-3)}
+.themes{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.tcard{border-radius:var(--r-lg);padding:22px;display:grid;gap:14px;border:1px solid}
+.tcard.light{background:#F1F2EE;color:#121416;border-color:#D5D8D1}
+.tcard.dark{background:#0F1112;color:#E9EBE6;border-color:#2A2E32}
+.tcard .row{display:flex;gap:6px;flex-wrap:wrap}
+.tcard .row i{width:38px;height:38px;border-radius:var(--r-sm);border:1px solid rgba(128,128,128,.25)}
+.tcard small{font:11px var(--f-mono);opacity:.7}
+.tcard .btn-demo{justify-self:start;padding:10px 16px;border-radius:var(--r-sm);font-weight:600;font-size:14px}
+.spec{display:grid;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);overflow:hidden}
+.spec>div{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:16px;align-items:baseline;padding:16px 20px;border-bottom:1px solid var(--line)}
+.spec>div:last-child{border-bottom:0}
+.spec .meta{font:11px/1.5 var(--f-mono);color:var(--ink-3)}
+.spec .sample{overflow-wrap:anywhere;color:var(--ink)}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:70px 36px minmax(0,1fr);gap:12px;align-items:center;font:12px var(--f-mono);color:var(--ink-2)}
+.bar i{display:block;height:12px;background:var(--signal-soft);border:1px solid var(--signal);border-radius:1px}
+.radii{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+.radii div{height:84px;border:1.5px solid var(--ink);background:var(--surface);display:grid;place-items:end start;padding:8px;font:11px var(--f-mono);color:var(--ink-2)}
+@media (max-width:560px){.spec>div{grid-template-columns:1fr;gap:6px}}
+</style>
+
+<section id="color">
+  <div class="sec-head">
+    <span class="path">/tokens/<b>color</b></span>
+    <h2>Color: paper, ink, one signal</h2>
+    <p>The neutrals lean slightly green-grey, like drafting paper. They are not warm cream and not pure grey. Ultramarine <code>signal</code> is the only brand color, and it covers less than 5% of any screen: links, primary actions, focus rings, the live status and the line under the active nav item. Success, warning and error colors only ever describe state.</p>
+  </div>
+  <div class="sw">
+    <div class="chip"><i style="background:var(--paper)"></i><div><b>paper</b><span>#F1F2EE · #0F1112</span></div></div>
+    <div class="chip"><i style="background:var(--paper-2)"></i><div><b>paper-2</b><span>#E7E9E3 · #16191B</span></div></div>
+    <div class="chip"><i style="background:var(--surface)"></i><div><b>surface</b><span>#FAFAF7 · #1A1D20</span></div></div>
+    <div class="chip"><i style="background:var(--line)"></i><div><b>line</b><span>#D5D8D1 · #2A2E32</span></div></div>
+    <div class="chip"><i style="background:var(--ink-3)"></i><div><b>ink-3</b><span>#7C8288 · #737980</span></div></div>
+    <div class="chip"><i style="background:var(--ink-2)"></i><div><b>ink-2</b><span>#4A4F55 · #A9AEB2</span></div></div>
+    <div class="chip"><i style="background:var(--ink)"></i><div><b>ink</b><span>#121416 · #E9EBE6</span></div></div>
+    <div class="chip"><i style="background:var(--signal)"></i><div><b>signal</b><span>#2A36E8 · #8391FF</span></div></div>
+    <div class="chip"><i style="background:var(--signal-soft)"></i><div><b>signal-soft</b><span>#DDE0FF · #1E2350</span></div></div>
+    <div class="chip"><i style="background:var(--ok)"></i><div><b>ok</b><span>#1E7F4F · #5CC98E</span></div></div>
+    <div class="chip"><i style="background:var(--warn)"></i><div><b>warn</b><span>#9A6400 · #E3B04B</span></div></div>
+    <div class="chip"><i style="background:var(--err)"></i><div><b>err</b><span>#C0342B · #FF7A6E</span></div></div>
+  </div>
+  <div class="themes">
+    <div class="tcard light">
+      <small>theme: light · "paper"</small>
+      <div style="font-size:26px;font-weight:700;letter-spacing:-.03em">Readable in daylight</div>
+      <div class="row"><i style="background:#F1F2EE"></i><i style="background:#FAFAF7"></i><i style="background:#D5D8D1"></i><i style="background:#4A4F55"></i><i style="background:#121416"></i><i style="background:#2A36E8"></i></div>
+      <span class="btn-demo" style="background:#2A36E8;color:#fff">Start a project</span>
+      <small>ink on paper and signal on paper both pass WCAG AA for small text</small>
+    </div>
+    <div class="tcard dark">
+      <small>theme: dark · "graphite" (used when the OS is dark)</small>
+      <div style="font-size:26px;font-weight:700;letter-spacing:-.03em">Calm at night</div>
+      <div class="row"><i style="background:#0F1112"></i><i style="background:#1A1D20"></i><i style="background:#2A2E32"></i><i style="background:#A9AEB2"></i><i style="background:#E9EBE6"></i><i style="background:#8391FF"></i></div>
+      <span class="btn-demo" style="background:#8391FF;color:#0B0D1F">Start a project</span>
+      <small>signal is lightened to #8391FF so it stays readable on graphite</small>
+    </div>
+  </div>
+  <p class="note">Dark is its own set of values, not an inversion. The signal is lighter and a little less saturated. Surfaces get <em>lighter</em> as they rise (paper → paper-2 → surface). Shadows become 1px borders, because shadows barely show on dark grounds. Check every pair with a contrast tool when implementing; the targets are 4.5:1 for text and 3:1 for borders of controls.</p>
+</section>
+
+<section id="type">
+  <div class="sec-head">
+    <span class="path">/tokens/<b>type</b></span>
+    <h2>Typography: three voices</h2>
+    <p><strong>Familjen Grotesk</strong> for display and interface text. It is a grotesk with some ink-trap character, so it does not read as Inter. <strong>Newsreader</strong> is used only for article text, so The Log feels like a publication. <strong>JetBrains Mono</strong> carries routes, metadata, dates, code and data. Sizes are fluid, using <code>clamp()</code> between a 360px phone and a 1440px desktop.</p>
+  </div>
+  <div class="spec">
+    <div><div class="meta">display-xl<br>clamp(56→176px)<br>700 · -0.055em · 0.84</div><div class="sample" style="font-size:clamp(44px,8vw,96px);font-weight:700;letter-spacing:-.055em;line-height:.84">Parsa</div></div>
+    <div><div class="meta">display<br>clamp(40→72px)<br>650 · -0.04em · 0.95</div><div class="sample" style="font-size:clamp(34px,5vw,64px);font-weight:650;letter-spacing:-.04em;line-height:.95">Selected work</div></div>
+    <div><div class="meta">h1<br>clamp(32→48px)<br>650 · -0.03em · 1.05</div><div class="sample" style="font-size:clamp(30px,4vw,48px);font-weight:650;letter-spacing:-.03em;line-height:1.05">Rebuilding offline sync for a field app</div></div>
+    <div><div class="meta">h2<br>clamp(24→32px)<br>600 · -0.02em · 1.15</div><div class="sample" style="font-size:clamp(24px,3vw,32px);font-weight:600;letter-spacing:-.02em;line-height:1.15">Why the queue came first</div></div>
+    <div><div class="meta">h3<br>20px · 600 · 1.3</div><div class="sample" style="font-size:20px;font-weight:600">Conflict resolution on the device</div></div>
+    <div><div class="meta">body-lg<br>18px · 400 · 1.6</div><div class="sample" style="font-size:18px;line-height:1.6;color:var(--ink-2)">I build web and mobile products end to end, from the database schema to the last detail of the interface.</div></div>
+    <div><div class="meta">body<br>16px · 400 · 1.55</div><div class="sample" style="font-size:16px;color:var(--ink-2)">Interface copy, card descriptions, form help text.</div></div>
+    <div><div class="meta">prose (The Log)<br>Newsreader 19→21px<br>400 · 1.7 · max 68ch</div><div class="sample" style="font:clamp(19px,1.6vw,21px)/1.7 var(--f-prose)">The first version synced everything on launch. It worked in the office and failed in a warehouse with one bar of signal, which is where the app was actually used.</div></div>
+    <div><div class="meta">label<br>13px · 600 · +0.08em · caps</div><div class="sample" style="font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Tech stack</div></div>
+    <div><div class="meta">mono / meta<br>12–13px · 400 · +0.02em</div><div class="sample mono" style="font-size:13px;color:var(--ink-2)">/log/offline-sync · 2026-08-14 · 9 min read</div></div>
+  </div>
+  <ul class="clean">
+    <li>Load all three with <code>next/font/google</code> (variable weights, <code>display: "swap"</code>, subset <code>latin</code>) and expose them as <code>--font-display</code>, <code>--font-prose</code> and <code>--font-mono</code>.</li>
+    <li>Headings use <code>text-wrap: balance</code> and paragraphs use <code>text-wrap: pretty</code>. Interface text stays under 72ch and article text under 68ch.</li>
+    <li>Only three weight levels appear: 400 for text, 600–650 for headings and emphasis, and 700 for the name only.</li>
+    <li>Dates, reading times and metrics use <code>tabular-nums</code>.</li>
+  </ul>
+</section>
+
+<section id="space">
+  <div class="sec-head">
+    <span class="path">/tokens/<b>space · radius · elevation</b></span>
+    <h2>Spacing, radius, elevation</h2>
+    <p>Everything sits on a 4px base. Components use the small steps and layouts use the large ones. Page gutters are 20px on phones, 32px on tablets and 48px on desktop. At desktop the content grid has 12 columns and a maximum width of 1200px. Article text sits in a 680px column.</p>
+  </div>
+  <div class="grid g2">
+    <div class="panel">
+      <h4>Space scale (token · px)</h4>
+      <div class="bars">
+        <div class="bar"><span>space-1</span><span>4</span><i style="width:4px"></i></div>
+        <div class="bar"><span>space-2</span><span>8</span><i style="width:8px"></i></div>
+        <div class="bar"><span>space-3</span><span>12</span><i style="width:12px"></i></div>
+        <div class="bar"><span>space-4</span><span>16</span><i style="width:16px"></i></div>
+        <div class="bar"><span>space-6</span><span>24</span><i style="width:24px"></i></div>
+        <div class="bar"><span>space-8</span><span>32</span><i style="width:32px"></i></div>
+        <div class="bar"><span>space-12</span><span>48</span><i style="width:48px"></i></div>
+        <div class="bar"><span>space-16</span><span>64</span><i style="width:64px"></i></div>
+        <div class="bar"><span>space-24</span><span>96</span><i style="width:96px"></i></div>
+        <div class="bar"><span>space-32</span><span>128</span><i style="width:128px"></i></div>
+      </div>
+      <p class="note">Space between page sections is <code>clamp(64px, 10vw, 128px)</code>. Space from a section heading to its content is 24px on phones and 32px on desktop.</p>
+    </div>
+    <div class="panel">
+      <h4>Radius</h4>
+      <div class="radii">
+        <div style="border-radius:2px">xs · 2 · tags, code</div>
+        <div style="border-radius:6px">sm · 6 · buttons, inputs</div>
+        <div style="border-radius:10px">md · 10 · cards</div>
+        <div style="border-radius:16px">lg · 16 · sheets, media</div>
+        <div style="border-radius:999px">pill · dock, status</div>
+      </div>
+      <p class="note">Corners stay tight on purpose. Only the mobile dock and status pills are fully rounded, so they read as controls floating above the page.</p>
+      <h4>Elevation</h4>
+      <ul class="clean">
+        <li><code>e0</code> flat: sections and lists, separated by 1px lines.</li>
+        <li><code>e1</code> card: 1px <code>line</code> border, no shadow.</li>
+        <li><code>e2</code> floating: dock, menus, toasts. Light uses <code>0 8px 24px -8px rgb(18 20 22 / .18)</code>. Dark uses a <code>line-strong</code> border and a 16px backdrop blur.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<style>
+.demo{background:var(--paper);border:1px dashed var(--line-strong);border-radius:var(--r-md);padding:20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{font:600 15px/1 var(--f-display);height:44px;padding:0 18px;border-radius:var(--r-sm);border:1px solid transparent;display:inline-flex;align-items:center;gap:10px;cursor:pointer;transition:background .18s var(--ease-out),border-color .18s,transform .12s,color .18s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--signal);color:var(--signal-ink)}
+.btn-primary:hover{background:color-mix(in srgb,var(--signal) 86%,var(--ink))}
+.btn-secondary{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+.btn-secondary:hover{border-color:var(--ink);background:var(--surface)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{color:var(--ink);background:var(--paper-2)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.btn .arr{font-family:var(--f-mono);transition:transform .2s var(--ease-out)}
+.btn:hover .arr{transform:translateX(3px)}
+.btn-sm{height:36px;padding:0 12px;font-size:14px}
+.spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.linkx{font-weight:600;color:var(--ink);text-decoration:none;background:linear-gradient(var(--signal),var(--signal)) 0 100%/0 1.5px no-repeat;transition:background-size .25s var(--ease-out);padding-bottom:2px}
+.linkx:hover{background-size:100% 1.5px;color:var(--signal)}
+.field{display:grid;gap:6px;flex:1 1 220px;min-width:0}
+.field label{font-size:13px;font-weight:600;color:var(--ink)}
+.field input,.field textarea{font:16px var(--f-display);color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r-sm);height:48px;padding:0 14px;width:100%;transition:border-color .15s,box-shadow .15s}
+.field input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 0 3px var(--signal-soft)}
+.field.err input{border-color:var(--err);box-shadow:0 0 0 3px var(--err-soft)}
+.field .help{font-size:13px;color:var(--ink-3)}
+.field.err .help{color:var(--err)}
+.field input:disabled{background:var(--paper-2);color:var(--ink-3)}
+.tag{font:12px var(--f-mono);color:var(--ink-2);border:1px solid var(--line);padding:3px 8px;border-radius:var(--r-xs);background:var(--surface)}
+.tag.cat{color:var(--signal);border-color:color-mix(in srgb,var(--signal) 40%,transparent);background:var(--signal-soft)}
+.pcard{display:grid;gap:14px;text-decoration:none;color:inherit;flex:1 1 280px;min-width:0}
+.pcard .media{aspect-ratio:4/3;border-radius:var(--r-lg);border:1px solid var(--line);background:linear-gradient(135deg,var(--paper-2),var(--surface));position:relative;overflow:hidden;max-width:100%}
+.pcard .media::before{content:"";position:absolute;inset:18% 14% 0 14%;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:8px 8px 0 0;transition:transform .45s var(--ease-out)}
+.pcard:hover .media::before{transform:translateY(-6px)}
+.pcard .yr{position:absolute;top:12px;left:12px;font:11px var(--f-mono);color:var(--ink-3)}
+.pcard .st{position:absolute;top:12px;right:12px;font:11px var(--f-mono);color:var(--ok)}
+.pcard h3{display:flex;justify-content:space-between;gap:12px}
+.pcard h3 .arr{font-family:var(--f-mono);color:var(--ink-3);transition:transform .2s,color .2s}
+.pcard:hover h3 .arr{transform:translate(3px,-3px);color:var(--signal)}
+.row-meta{display:flex;flex-wrap:wrap;gap:6px}
+.arow{display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;padding:18px 0;border-top:1px solid var(--line);text-decoration:none;color:inherit}
+.arow:last-child{border-bottom:1px solid var(--line)}
+.arow .d{font:12px var(--f-mono);color:var(--ink-3);padding-top:4px;font-variant-numeric:tabular-nums}
+.arow h3{font-size:19px;transition:color .15s}
+.arow:hover h3{color:var(--signal)}
+.arow p{font-size:15px;margin-top:4px}
+.navd{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 16px;background:var(--paper);border:1px dashed var(--line-strong);border-radius:var(--r-md);flex-wrap:wrap}
+.navd ul{display:flex;gap:3px;list-style:none;margin:0;padding:3px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r-pill);box-shadow:0 8px 24px -8px rgb(18 20 22/.18)}
+.navd li a{display:grid;position:relative;overflow:hidden;isolation:isolate;padding:0 16px;height:36px;align-content:center;font-size:15px;font-weight:500;color:var(--ink-2);text-decoration:none;border-radius:var(--r-pill)}
+.navd li a::before{content:"";position:absolute;left:50%;bottom:0;z-index:-1;width:calc(100% + 24px);aspect-ratio:1;border-radius:50%;background:var(--ink);transform:translate(-50%,50%) scale(0);transition:transform .38s var(--ease-out)}
+.navd li a:hover::before,.navd li a:focus-visible::before{transform:translate(-50%,50%) scale(1.25)}
+.navd li a:hover,.navd li a:focus-visible{color:var(--paper);transition:color .2s .06s}
+.navd li a.on{color:var(--ink);background:var(--paper-2)}
+.navd li a.on::after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--signal)}
+.navd .round{width:44px;height:44px;border-radius:50%!important}
+.phone{width:min(100%,300px);aspect-ratio:9/19;border:1.5px solid var(--ink);border-radius:36px;background:var(--paper);position:relative;overflow:hidden;padding:18px 16px}
+.phone .ptop{display:flex;justify-content:space-between;align-items:center;font:11px var(--f-mono);color:var(--ink-3)}
+.phone .pname{font-size:44px;font-weight:700;letter-spacing:-.05em;line-height:.86;margin-top:40px}
+.phone .pname span{display:block;color:transparent;-webkit-text-stroke:1.2px var(--ink);padding-left:.4em}
+.phone p{font-size:13px;margin-top:14px}
+.dock{position:absolute;left:12px;right:12px;bottom:14px;display:grid;grid-template-columns:repeat(5,1fr);background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(14px);border:1px solid var(--line-strong);border-radius:var(--r-pill);padding:6px;box-shadow:0 8px 24px -8px rgb(18 20 22/.25)}
+.dock span{display:grid;justify-items:center;gap:3px;font:10px var(--f-display);color:var(--ink-3);padding:6px 0;border-radius:var(--r-pill)}
+.dock span.on{color:var(--ink);background:var(--paper-2)}
+.dock svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line-strong);border-radius:22px 22px 0 0;padding:10px 20px 90px;display:grid;gap:4px}
+.sheet .grab{width:36px;height:4px;border-radius:4px;background:var(--line-strong);justify-self:center;margin-bottom:10px}
+.sheet a{font-size:24px;font-weight:650;letter-spacing:-.02em;color:var(--ink);text-decoration:none;padding:6px 0;display:flex;justify-content:space-between;align-items:baseline}
+.sheet a small{font:11px var(--f-mono);color:var(--ink-3)}
+.phones{display:flex;gap:24px;flex-wrap:wrap}
+.skel{background:linear-gradient(90deg,var(--paper-2) 0%,var(--surface) 50%,var(--paper-2) 100%);background-size:200% 100%;animation:sh 1.4s ease-in-out infinite;border-radius:var(--r-xs)}
+@keyframes sh{from{background-position:100% 0}to{background-position:-100% 0}}
+.state{display:grid;gap:10px;justify-items:start;padding:24px;border:1px dashed var(--line-strong);border-radius:var(--r-md);background:var(--paper)}
+.state .glyph{font:13px/1.6 var(--f-mono);color:var(--ink-3);white-space:pre}
+.state.errst{border-color:color-mix(in srgb,var(--err) 50%,transparent);background:var(--err-soft)}
+.state.errst .glyph{color:var(--err)}
+.toast{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r-md);background:var(--ink);color:var(--paper);font-size:14px;width:max-content;max-width:100%}
+.foot{border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);padding:24px;display:grid;gap:24px}
+.foot .big{font-size:clamp(28px,5vw,48px);font-weight:650;letter-spacing:-.035em;line-height:1}
+.foot .cols{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));font-size:14px}
+.foot .cols div{display:grid;gap:6px;align-content:start}
+.foot .cols a{color:var(--ink-2);text-decoration:none}
+.foot .base{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--line);padding-top:14px;font:11px var(--f-mono);color:var(--ink-3)}
+.icons{display:flex;gap:18px;flex-wrap:wrap;color:var(--ink)}
+.icons svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+@media (prefers-reduced-motion:reduce){.skel,.spin{animation:none}*{transition:none!important}}
+</style>
+
+<section id="components">
+  <div class="sec-head">
+    <span class="path">/<b>components</b></span>
+    <h2>Components</h2>
+    <p>Every component below is live. Hover it, tab to it, and switch themes. States are designed, not left to browser defaults: default, hover, pressed, keyboard focus, disabled, loading and error where it applies.</p>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <h4>Buttons</h4>
+      <div class="demo">
+        <button class="btn btn-primary">Start a project <span class="arr">→</span></button>
+        <button class="btn btn-secondary">View work</button>
+        <button class="btn btn-ghost">Copy email</button>
+      </div>
+      <div class="demo">
+        <button class="btn btn-primary" disabled>Sending</button>
+        <button class="btn btn-primary"><span class="spin"></span>Sending…</button>
+        <button class="btn btn-secondary btn-sm">Filter</button>
+        <a class="linkx" href="#components">Read the case study →</a>
+      </div>
+      <ul class="clean">
+        <li>Heights: 44px default, 36px small. Every touch target is at least 44×44px.</li>
+        <li><strong>Primary</strong> appears once per screen at most. It is the signal color and says exactly what happens.</li>
+        <li>Hover darkens by 14% and nudges the arrow 3px. Press moves the button 1px down. Focus shows a 2px signal ring with a 3px offset.</li>
+        <li>Loading keeps the button's width, swaps in a spinner, sets <code>aria-busy</code>, and changes the label to the action in progress.</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h4>Inputs</h4>
+      <div class="demo">
+        <div class="field"><label for="d-name">Name</label><input id="d-name" placeholder="Your name"><span class="help">So I know who to reply to.</span></div>
+        <div class="field err"><label for="d-mail">Email</label><input id="d-mail" value="sara@company" aria-invalid="true"><span class="help">Add the domain ending, for example sara@company.com</span></div>
+      </div>
+      <div class="demo">
+        <div class="field"><label for="d-dis">Budget</label><input id="d-dis" value="Not needed for this inquiry type" disabled></div>
+      </div>
+      <ul class="clean">
+        <li>Height 48px, text 16px (prevents iOS zoom), label always visible above the field. Placeholders are examples, never labels.</li>
+        <li>Validate on blur, then on every change once a field has shown an error. The error line replaces the help line and says how to fix it.</li>
+        <li>Focus: signal border plus a 3px <code>signal-soft</code> ring. Error: <code>err</code> border plus <code>err-soft</code> ring and <code>aria-describedby</code> on the message.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>Cards: project and article</h4>
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+      <a class="pcard" href="#components">
+        <div class="media"><span class="yr">2026 · Web + iOS</span><span class="st">● Live</span></div>
+        <div><h3>Fieldbook <span class="arr">↗</span></h3><p class="note">Offline-first inspection app for teams working without signal.</p></div>
+        <div class="row-meta"><span class="tag">Next.js</span><span class="tag">React Native</span><span class="tag">Postgres</span></div>
+      </a>
+      <a class="pcard" href="#components">
+        <div class="media"><span class="yr">2025 · AI tool</span><span class="st" style="color:var(--warn)">◐ In progress</span></div>
+        <div><h3>Querylens <span class="arr">↗</span></h3><p class="note">Ask questions of a database in plain language, with the SQL shown.</p></div>
+        <div class="row-meta"><span class="tag">TypeScript</span><span class="tag">LLM</span><span class="tag">Three.js</span></div>
+      </a>
+      <div style="flex:1 1 320px;min-width:0">
+        <a class="arow" href="#components"><span class="d">2026-08-14</span><div><div class="row-meta" style="margin-bottom:6px"><span class="tag cat">Mobile</span><span class="tag">9 min</span></div><h3>Rebuilding offline sync for a field app</h3><p>What broke when the network did, and the queue that fixed it.</p></div></a>
+        <a class="arow" href="#components"><span class="d">2026-07-02</span><div><div class="row-meta" style="margin-bottom:6px"><span class="tag cat">AI</span><span class="tag">6 min</span></div><h3>Streaming LLM output into React without jank</h3><p>Buffers, transitions, and when not to re-render.</p></div></a>
+      </div>
+    </div>
+    <ul class="clean">
+      <li><strong>Project card</strong>: 4:3 media with a mock UI frame that lifts 6px on hover. Year and platform top-left, status top-right (Live, In progress, Archived). The whole card is one link; the arrow moves diagonally on hover.</li>
+      <li><strong>Article row</strong>: not a card. Articles are a dated list separated by lines, like a journal index. The title turns signal on hover.</li>
+      <li>Tags are mono, 2px radius. Category tags use <code>signal-soft</code>; technology tags stay neutral.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h4>Navigation: desktop bar and mobile dock</h4>
+    <nav class="navd" aria-label="Desktop navigation example (hover or tab to see the fill)">
+      <div class="mark"><div class="mono-mark">PA</div></div>
+      <ul><li><a class="on" href="#components">Work</a></li><li><a href="#components">About</a></li><li><a href="#components">Stack</a></li><li><a href="#components">Log</a></li><li><a href="#components">Contact</a></li></ul>
+      <div style="display:flex;gap:8px;align-items:center"><button class="btn btn-secondary round" style="padding:0;justify-content:center;font:12px var(--f-mono)" aria-label="Search (⌘K)">⌘K</button><button class="btn btn-secondary round" style="padding:0;justify-content:center" aria-label="Theme">◐</button></div>
+    </nav>
+    <div class="phones">
+      <div class="phone" aria-hidden="true">
+        <div class="ptop"><div class="mono-mark" style="width:28px;height:28px;font-size:11px">PA</div><span>◐</span></div>
+        <div class="pname">Parsa<span>Alizadeh</span></div>
+        <p>Software developer building web and mobile products, and the AI tools in between.</p>
+        <div class="dock">
+          <span class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</span>
+          <span><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>Work</span>
+          <span><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h7M9 14h7"/></svg>Log</span>
+          <span><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>Contact</span>
+          <span><svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>More</span>
+        </div>
+      </div>
+      <div class="phone" aria-hidden="true">
+        <div class="ptop"><span>/work</span><span>◐</span></div>
+        <div class="pname" style="font-size:34px">Selected work</div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <a>About <small>/about</small></a>
+          <a>Stack <small>/stack</small></a>
+          <a>Uses <small>/uses</small></a>
+          <a style="font-size:16px;font-weight:500;color:var(--ink-2)">GitHub · LinkedIn · X <small>↗</small></a>
+        </div>
+        <div class="dock">
+          <span><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</span>
+          <span><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>Work</span>
+          <span><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h7M9 14h7"/></svg>Log</span>
+          <span><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>Contact</span>
+          <span class="on"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>Close</span>
+        </div>
+      </div>
+    </div>
+    <ul class="clean">
+      <li><strong>Desktop (≥1024px, fine pointer)</strong>: a floating header 16px from the top: round <code>PA</code> monogram, the <code>PillNav</code> group, then round action buttons. It is the desktop sibling of the mobile dock: same pill shape, surface, border and floating shadow. Hover or keyboard focus fills a link with ink rising from below while its label slides up and is replaced in paper color. The current section (including subpages) gets a paper-2 fill, a small signal dot and <code>aria-current="page"</code>. The header hides on scroll down, returns on scroll up, and never hides while it holds focus. <code>⌘K</code> opens a command menu for pages, projects and articles.</li>
+      <li><strong>Mobile (&lt;1024px)</strong>: a floating dock at the bottom, where the thumb already is. Five slots: Home, Work, Log, Contact, More. It sits 12px from the edges plus the safe-area inset. The top bar keeps only the monogram and the theme toggle.</li>
+      <li><strong>More</strong> opens a bottom sheet with large 24px links (About, Stack, Uses) and social links. Drag down, tap outside, or press Escape to close. Focus is trapped while it is open and returns to the More button afterwards.</li>
+      <li>On article pages the dock shrinks into a reading bar showing progress, the current heading and a back-to-top button. It expands again when you scroll up.</li>
+    </ul>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <h4>Footer</h4>
+      <div class="foot">
+        <div class="big">Have something to build?<br><a class="linkx" href="#components" style="font-weight:650">hello@parsaalizadeh.dev</a></div>
+        <div class="cols">
+          <div><span class="path">/site</span><a href="#components">Work</a><a href="#components">About</a><a href="#components">Log</a></div>
+          <div><span class="path">/elsewhere</span><a href="#components">GitHub ↗</a><a href="#components">LinkedIn ↗</a><a href="#components">X ↗</a></div>
+          <div><span class="path">/feeds</span><a href="#components">RSS</a><a href="#components">Newsletter</a></div>
+        </div>
+        <div class="base"><span>© 2026 Parsa Alizadeh</span><span>built with Next.js · last deploy 2026-09-19 · a3f9c1e</span></div>
+      </div>
+      <p class="note">The last line is a real build stamp (date and short commit hash injected at build time). It is small, true, and quietly says “developer”. The email domain is a placeholder.</p>
+    </div>
+    <div class="panel">
+      <h4>Icons</h4>
+      <div class="icons" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h9"/></svg>
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <ul class="clean">
+        <li>Use <strong>Lucide</strong> (<code>lucide-react</code>) at 1.6px stroke, 20px in controls and 24px standalone. Brand marks (GitHub, LinkedIn, X) come from <code>simple-icons</code> as monochrome.</li>
+        <li>Icons inherit <code>currentColor</code>. They are never filled with the signal color on their own.</li>
+        <li>Every icon-only button has an <code>aria-label</code>. <code>↗</code> means “leaves this site”, <code>→</code> means “goes deeper here”.</li>
+        <li>No emoji in the interface.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid g3">
+    <div class="panel">
+      <h4>Loading</h4>
+      <div style="display:grid;gap:10px">
+        <div class="skel" style="aspect-ratio:4/3;border-radius:var(--r-lg)"></div>
+        <div class="skel" style="height:18px;width:60%"></div>
+        <div class="skel" style="height:12px;width:85%"></div>
+      </div>
+      <p class="note">Skeletons copy the exact shape of what is coming, so nothing jumps. Only show them after 150ms, so fast loads show nothing at all. Route changes show a 2px signal progress line at the top of the page.</p>
+    </div>
+    <div class="panel">
+      <h4>Empty</h4>
+      <div class="state">
+        <div class="glyph">$ ls /log?tag=rust
+0 results</div>
+        <strong>No articles tagged Rust yet</strong>
+        <p class="note">Try a broader tag, or see everything in the Log.</p>
+        <button class="btn btn-secondary btn-sm">Clear filter</button>
+      </div>
+      <p class="note">Empty states say what is empty, why, and give one way forward.</p>
+    </div>
+    <div class="panel">
+      <h4>Error</h4>
+      <div class="state errst">
+        <div class="glyph">✕ POST /api/contact → 503</div>
+        <strong>Your message wasn't sent</strong>
+        <p class="note">The mail service didn't respond. Your text is saved in this form. Try again, or email hello@parsaalizadeh.dev directly.</p>
+        <button class="btn btn-primary btn-sm">Try again</button>
+      </div>
+      <div class="toast" role="status"><span style="color:#5CC98E">✓</span>Email copied</div>
+    </div>
+  </div>
+</section>
+<style>
+.page{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));padding-block:28px;border-top:1px solid var(--line)}
+.page:first-of-type{border-top:0}
+.wire{display:grid;gap:6px;align-content:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px}
+.wire div{border:1px solid var(--line-strong);border-radius:var(--r-xs);padding:8px 10px;font:12px/1.4 var(--f-mono);color:var(--ink-2);background:var(--paper)}
+.wire div.hi{border-color:var(--signal);color:var(--ink);background:var(--signal-soft)}
+.wire .split{display:grid;grid-template-columns:2fr 1fr;gap:6px;border:0;padding:0;background:none}
+.wire .tri{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border:0;padding:0;background:none}
+.wire .tall{min-height:84px}
+.pinfo{display:grid;gap:10px;align-content:start}
+.pinfo h3{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.pinfo h3 .path{font-weight:400}
+</style>
+
+<section id="pages">
+  <div class="sec-head">
+    <span class="path">/<b>pages</b></span>
+    <h2>Page blueprints</h2>
+    <p>Each blueprint shows the desktop order of blocks. On phones the same blocks stack top to bottom in the order listed, and anything in a side column moves below its main column unless the notes say otherwise. The block tinted in signal is the page's one focal point.</p>
+  </div>
+
+  <div class="page">
+    <div class="wire">
+      <div>Top bar · monogram · nav · ⌘K · theme</div>
+      <div class="split"><div class="hi tall">Hero: “Parsa / Alizadeh” lockup · title line · 2-line intro · status pill · 2 CTAs</div><div class="tall">The Lattice (Three.js) · portrait card overlaps its lower-left corner</div></div>
+      <div>Profile strip: GitHub · LinkedIn · X · email · CV (mono links)</div>
+      <div>/work: Selected work · 1 featured wide card + 2 cards</div>
+      <div>/stack: daily tools strip (LogoLoop, labeled, pausable) + link to full map</div>
+      <div class="split"><div>/log: 3 latest articles (dated rows)</div><div>“Now” note: what I'm building this month</div></div>
+      <div>Contact band: scroll-driven type strip (ScrollVelocity) + primary CTA → footer</div>
+    </div>
+    <div class="pinfo">
+      <h3>Home <span class="path">/</span></h3>
+      <ul class="clean">
+        <li><strong>Hero</strong>: the name lockup is the headline, not “Hi, I'm…”. Under it, a title line in mono: <code>Software · Web · Mobile · AI</code>. Then two sentences: <em>“I build web and mobile products end to end, and the AI tools that make them smarter. I care about fast interfaces, clean systems and shipping.”</em></li>
+        <li>Status pill: <code>● Available for new projects · local time 14:32</code>. It reads from a config file and hides when unavailable.</li>
+        <li>CTAs: <strong>Start a project</strong> (primary, goes to /contact) and <strong>See selected work</strong> (secondary, scrolls).</li>
+        <li><strong>Portrait</strong>: a real photo, 4:5, grayscale with a light duotone into the ink color, 16px radius, 1px border. It turns to full color on hover (desktop) or after 1.2s in view (mobile). Mono caption beneath: <code>Parsa Alizadeh · 2026</code>.</li>
+        <li><strong>Phone layout</strong>: name, title line, intro, CTAs, then the portrait at full width with the static Lattice poster faintly behind it. No WebGL on phones.</li>
+        <li>“Now” is a short dated note (what's being built, learned, read). It changes monthly and gives returning visitors a reason to come back.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="wire">
+      <div class="split"><div class="hi tall">Intro: large statement + 3 short paragraphs</div><div class="tall">PortraitCard (3:4 photo print: tilt + glare, info strip) + facts list</div></div>
+      <div>/belief: one pull statement, words brighten on scroll (ScrollReveal)</div>
+      <div>/changelog: career as version history (v0.1 → v3.x)</div>
+      <div class="tri"><div>Principle</div><div>Principle</div><div>Principle</div></div>
+      <div>Outside the editor: reading, interests (small)</div>
+      <div>CTA: download CV · contact</div>
+    </div>
+    <div class="pinfo">
+      <h3>About <span class="path">/about</span></h3>
+      <ul class="clean">
+        <li><strong>Portrait</strong>: <code>PortraitCard</code>, a photo print rather than a holographic card. Grayscale at rest and colour on hover (or after 1.2s in view on touch). With a mouse it tilts up to 6° toward the pointer while a soft glare follows it, and it settles and stops when the pointer leaves. A frosted strip at the bottom holds the name, availability and a Contact link. The home portrait stays still, since the Lattice beside it already follows the cursor.</li>
+        <li>Opens with one large statement (display size) in Parsa's voice, then a story in three short paragraphs: how he started, what he builds now, what he wants to work on next.</li>
+        <li><strong>Changelog</strong>: the signature section. Career milestones written as releases, newest first: <code>v3.2 · 2026 · Started building AI tooling for…</code>. Version numbers are a real sequence, so the numbering carries meaning. Each entry has a year, role or event, and one line. It appears as a vertical line with nodes; on phones the dates sit above the text.</li>
+        <li><strong>Belief</strong>: one large statement between the story and the Changelog. <code>ScrollReveal</code> brightens its words from 18% to full as it passes the reading line. It is the only scroll-linked text on the site, it always sits below the fold, and it shows fully lit with reduced motion or if it was already on screen.</li>
+        <li><strong>Principles</strong>: three working beliefs, each a short heading and two lines, for example “Ship the smallest real thing”, “Performance is a feature”, “Write it down”.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="wire">
+      <div class="hi">Intro + legend: ●●● daily · ●●○ often · ●○○ familiar</div>
+      <div>Layer: Interface (React, Next.js, TypeScript, Tailwind, Three.js)</div>
+      <div>Layer: Mobile (React Native, Expo, Flutter…)</div>
+      <div>Layer: Server &amp; data (Node, Postgres, Prisma…)</div>
+      <div>Layer: AI (LLM APIs, RAG, evals…)</div>
+      <div>Layer: Tooling &amp; ops (Git, Docker, CI, Vercel…)</div>
+      <div>“Currently learning” row · link to /uses</div>
+    </div>
+    <div class="pinfo">
+      <h3>Skills <span class="path">/stack</span></h3>
+      <ul class="clean">
+        <li>Not progress bars or percentages; nobody is “85% React”. Technologies are grouped by <strong>layer</strong> of the stack, and each shows how often it is used: three dots, filled for daily, often or familiar. It is honest and quick to scan.</li>
+        <li>Each item: brand icon (monochrome), name, dots and a one-line note on hover or tap, e.g. “Next.js: App Router, RSC, 4 production apps”. Clicking filters /work to projects using it.</li>
+        <li>Layout (desktop): a sticky <code>OptionWheel</code> on the left lists the layers in stack order on a gentle curve. It follows the layer being read as the page scrolls, and clicking, dragging or using arrow keys on it scrolls to that layer. The mouse wheel still scrolls the page. On phones the wheel is hidden and each layer shows its own heading above its items.</li>
+        <li>The home page shows only the daily tools, as a slow labeled strip (<code>LogoLoop</code>) with a pause button, linking here for the full map.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="wire">
+      <div>Header: “Selected work” + count · filter chips (All · Web · Mobile · AI · Open source)</div>
+      <div>Desktop only: project screenshot wall (DriftWall), grayscale, tile lifts to color + name on hover</div>
+      <div class="hi tall">Featured project: full-width card, 16:9 media</div>
+      <div class="split"><div class="tall">Project card</div><div class="tall">Project card</div></div>
+      <div>Archive: compact table (year · name · type · stack · link)</div>
+    </div>
+    <div class="pinfo">
+      <h3>Projects <span class="path">/work</span></h3>
+      <ul class="clean">
+        <li>Curated work first (4–8 projects with case studies), then an <strong>archive</strong> table of smaller things. The table scrolls sideways inside its own container on phones.</li>
+        <li>Filter chips update the URL (<code>?type=mobile</code>), so filtered views can be shared. Cards leave and enter with a 200ms fade and layout animation.</li>
+        <li><strong>Screenshot wall</strong> (<code>DriftWall</code>, desktop only): real screenshots of the projects on a tilted, slowly drifting wall. Grayscale and dimmed at rest; the hovered tile lifts toward the viewer in color with the project name, and clicking opens the case study. It is decorative for screen readers and keyboard users (the same links are in the list), has a pause button, and is not mounted on phones, so its images never download there.</li>
+        <li>Phones: one column, filter chips in a horizontal scroll row with edge fade, featured card first.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="wire">
+      <div>Back link · breadcrumb path /work/fieldbook</div>
+      <div class="hi">Title · one-line outcome · spec sheet (role · year · platform · stack · status · links)</div>
+      <div class="tall">Cover (ScrollExpand): framed window opens to full bleed on scroll · static 4:3 on phones</div>
+      <div class="split"><div class="tall">Case study: Problem → Approach → Build → Result (MDX)</div><div class="tall">Sticky side: section index + live/repo links</div></div>
+      <div>Outcomes: 2–4 metric figures</div>
+      <div>Gallery (horizontal scroll-snap on phones)</div>
+      <div>Next project → (full-width link)</div>
+    </div>
+    <div class="pinfo">
+      <h3>Project detail <span class="path">/work/[slug]</span></h3>
+      <ul class="clean">
+        <li>The <strong>spec sheet</strong> is a two-column label/value grid in mono, like a datasheet: Role, Year, Platform, Stack, Status, Links. It is the first thing a recruiter reads.</li>
+        <li>The case study has four fixed sections (Problem, Approach, Build, Result). That order is a real narrative, so the sections are numbered.</li>
+        <li>Outcome figures are shown large only when real numbers exist (e.g. “Sync time 11s → 1.4s”). Otherwise the section is left out.</li>
+        <li><strong>Cover</strong>: <code>ScrollExpand</code>, placed after the spec sheet so the facts come first. On desktop it starts as a 56%-wide framed window and opens to full bleed over 0.8 of a screen of scroll, then holds briefly. On phones, tablets and with reduced motion it is a static 4:3 figure; CSS picks the layout, so nothing shifts on load. The view-transition morph from /work applies to the title, not the cover.</li>
+        <li>Ends with a large “Next project” link so the reader never hits a dead end.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="wire">
+      <div class="hi">Masthead: “The Log” · one-line description · RSS · subscribe</div>
+      <div class="split"><div class="tall">Latest article: large (cover 16:9, title, dek, meta)</div><div class="tall">Categories list with counts · popular tags</div></div>
+      <div>Search field + category tabs</div>
+      <div>Index grouped by year: dated rows</div>
+      <div>Pagination: “Older entries →”</div>
+    </div>
+    <div class="pinfo">
+      <h3>Blog <span class="path">/log</span></h3>
+      <ul class="clean">
+        <li>Named <strong>The Log</strong>, with its own masthead, to feel like a technical publication. Categories: Web, Mobile, AI, Engineering, Notes.</li>
+        <li>The newest article is featured large. Everything else is a dated index grouped under year headings (<code>2026</code>, <code>2025</code>), which is how a journal's archive works.</li>
+        <li>Search filters client-side as you type (index generated at build time). Category tabs are links (<code>/log/category/ai</code>).</li>
+        <li>Phones: masthead, featured article, category tabs in a horizontal scroll row, then the index. The sidebar moves below the index.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="wire">
+      <div>Reading progress (2px, top) · back to /log</div>
+      <div class="hi">Category · Title · dek · author row (avatar, name, date, reading time) · tags</div>
+      <div class="tall">Cover image (21:9 desktop, 4:3 phone) + caption</div>
+      <div class="split"><div class="tall">Prose (680px): headings, code, callouts, figures, footnotes</div><div class="tall">Sticky “On this page” TOC · share · copy link</div></div>
+      <div>Author card · “Was this useful?” · edit on GitHub</div>
+      <div class="tri"><div>Related</div><div>Related</div><div>Related</div></div>
+      <div>Newsletter signup (single field)</div>
+    </div>
+    <div class="pinfo">
+      <h3>Article <span class="path">/log/[slug]</span></h3>
+      <ul class="clean">
+        <li>Header order: category tag, title (h1), dek (description, body-lg), then the author row: 32px avatar, “Parsa Alizadeh”, publication date, updated date if any, reading time. Tags follow as mono chips.</li>
+        <li>Prose in Newsreader at 19–21px. Code blocks use Shiki with a theme built from the tokens, plus filename tab, line highlights and a copy button. Callouts come in Note, Tip and Warning, marked with a left label (not a colored side stripe).</li>
+        <li>Desktop: TOC in the right margin, current section highlighted. Footnotes appear as margin notes at ≥1280px and as a list at the end below that.</li>
+        <li>Phones: the dock becomes a reading bar with progress and the current heading; tapping it opens the TOC as a bottom sheet.</li>
+        <li><strong>Related articles</strong>: three, chosen by shared tags then category, shown as compact rows with cover thumbnails.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="wire">
+      <div class="split"><div class="hi tall">“Let's build something.” · email (click to copy) · response time</div><div class="tall">Form: name · email · project type chips · budget (optional) · message</div></div>
+      <div>Profiles: GitHub · LinkedIn · X · CV</div>
+      <div>FAQ: 3–4 questions (availability, rates, remote)</div>
+    </div>
+    <div class="pinfo">
+      <h3>Contact <span class="path">/contact</span></h3>
+      <ul class="clean">
+        <li>Two ways to reach Parsa, side by side: copy the email in one tap (toast confirms “Email copied”), or use the form.</li>
+        <li>Project type is a set of chips (Web app, Mobile app, AI feature, Something else), which is faster on a phone than a dropdown.</li>
+        <li>Submit states: <em>Send message</em> → <em>Sending…</em> → a success panel replaces the form: “Message sent. I usually reply within 2 working days.” Failures keep the text and offer the email address.</li>
+        <li>Include a hidden honeypot field and rate limiting in the route handler.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="wire">
+      <div class="hi tall">“404” built from particles (ParticleText) that gather on load and scatter away from the pointer</div>
+      <div>Message + the path that failed, in mono</div>
+      <div>Suggestions: Home · Work · Log · search field</div>
+    </div>
+    <div class="pinfo">
+      <h3>404 <span class="path">/*</span></h3>
+      <ul class="clean">
+        <li>Headline: <strong>“This route doesn't exist.”</strong> Below it, the requested path in mono: <code>GET /projcts → 404</code>.</li>
+        <li>If the path is close to a real one (edit distance ≤ 2), offer it: “Did you mean <a href="#pages">/projects</a>?”</li>
+        <li>Then three links and a search field. The brand voice here is dry, not cute.</li>
+        <li>Visual: <code>ParticleText</code> (adapted from React Bits) draws “404” on a 2D canvas. Particles gather once in about 1.4s, then stay still; the pointer pushes them aside. About 6% carry the signal color. The loop sleeps once settled or offscreen, reduced motion renders the final shape directly, and no WebGL is needed.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section id="arch">
+  <div class="sec-head">
+    <span class="path">/<b>architecture</b></span>
+    <h2>Component architecture</h2>
+    <p>Next.js App Router with React Server Components by default. Client components only where there is interaction: nav, theme, filters, forms, the Lattice and motion wrappers. Content lives in MDX files in the repo, so there is no CMS to maintain yet.</p>
+  </div>
+  <div class="grid g2">
+<pre><span class="c"># app/ (routes)</span>
+app/
+  layout.tsx            <span class="c"># fonts, ThemeProvider, SiteHeader, Dock, Footer</span>
+  page.tsx              <span class="c"># /</span>
+  about/page.tsx
+  stack/page.tsx
+  work/page.tsx
+  work/[slug]/page.tsx
+  log/page.tsx
+  log/[slug]/page.tsx
+  log/category/[cat]/page.tsx
+  contact/page.tsx
+  api/contact/route.ts
+  not-found.tsx         <span class="c"># 404</span>
+  loading.tsx  error.tsx
+
+content/
+  work/*.mdx            <span class="c"># frontmatter: title, year, role…</span>
+  log/*.mdx             <span class="c"># title, description, cover, date…</span>
+  site.ts               <span class="c"># name, links, status, now</span>
+  stack.ts              <span class="c"># layers + items + frequency</span>
+  changelog.ts</pre>
+<pre><span class="c"># components/ (by layer)</span>
+components/
+  ui/                   <span class="c"># primitives, no business logic</span>
+    Button  Link  Tag  Input  Textarea
+    ChipGroup  Skeleton  Toast  Sheet
+    Dialog  Kbd  Icon  Status  OptionWheel
+    PortraitCard
+  layout/
+    SiteHeader  PillNav  Dock  MoreSheet  ReadingBar
+    Footer  Container  Section  PathLabel
+    CommandMenu  ThemeToggle  RouteProgress
+  home/
+    Hero  NameLockup  Portrait  ProfileLinks
+    NowNote  ContactBand
+  three/
+    Lattice.tsx  LatticeCanvas.tsx
+    LatticePoster.tsx   <span class="c"># static fallback</span>
+  work/
+    ProjectCard  FeaturedProject  SpecSheet
+    WorkFilters  ArchiveTable  NextProject
+  log/
+    ArticleRow  FeaturedArticle  ArticleHeader
+    AuthorRow  Toc  Prose  CodeBlock  Callout
+    RelatedArticles  NewsletterForm
+  about/  Changelog  Principles
+  stack/  StackLayers  StackItem  FrequencyDots
+  contact/ ContactForm  CopyEmail  Faq
+  effects/ ParticleText   <span class="c"># 404 only: one effect per screen</span>
+           FoldText       <span class="c"># hero name reveal only (CSS, no GSAP)</span>
+           ScrollReveal   <span class="c"># About belief statement only</span>
+           ScrollVelocity <span class="c"># home contact band only; moves only on scroll</span>
+           ScrollExpand   <span class="c"># project page cover only; desktop pin</span>
+           LogoLoop       <span class="c"># home stack strip only; pausable</span>
+           DriftWall      <span class="c"># /work screenshot wall; desktop only</span>
+           OrbitImages    <span class="c"># available, not placed</span>
+           GhostFibers    <span class="c"># available, not placed (needs ogl)</span>
+           ProfileCard    <span class="c"># available, not placed (holo version)</span>
+  motion/  Reveal  Stagger  PageTransition
+lib/  content.ts  reading-time.ts  cn.ts</pre>
+  </div>
+  <ul class="clean">
+    <li><strong>ui/</strong> components take variants through <code>class-variance-authority</code> and merge classes with <code>tailwind-merge</code> (a <code>cn()</code> helper). They never import from feature folders.</li>
+    <li><strong>Section</strong> renders the section wrapper, its spacing and the <code>PathLabel</code> eyebrow, so every page gets the route label for free.</li>
+    <li>Content types are defined once with Zod (or Velite / Content Collections) and validated at build time, so a missing cover or date fails the build instead of the page.</li>
+  </ul>
+</section>
+
+<section id="responsive">
+  <div class="sec-head">
+    <span class="path">/<b>responsive</b></span>
+    <h2>Responsive behavior</h2>
+    <p>Designed at 375px first, then widened. Breakpoints follow the content, and they map onto Tailwind's defaults so nobody has to remember custom ones.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Range</th><th>Layout</th><th>Navigation</th><th>Hero</th><th>Grids</th></tr></thead>
+      <tbody>
+        <tr><td>&lt; 640 <code>base</code></td><td>1 column, 20px gutters</td><td>Top: monogram + theme. Bottom dock + More sheet</td><td>Name 56–80px, static Lattice poster, portrait full width</td><td>Cards 1-up; chip rows scroll sideways</td></tr>
+        <tr><td>640–1023 <code>sm md</code></td><td>1–2 columns, 32px gutters</td><td>Dock stays (tablets are touch)</td><td>Name up to 120px, portrait 2/3 width</td><td>Cards 2-up; related 2-up</td></tr>
+        <tr><td>1024–1279 <code>lg</code></td><td>12 columns, 48px gutters</td><td>Top bar with links, dock hidden</td><td>Split: name left, Lattice (WebGL) right</td><td>Featured full width + 2-up; TOC appears</td></tr>
+        <tr><td>≥ 1280 <code>xl</code></td><td>Max 1200px, centered</td><td>Top bar + ⌘K hint</td><td>Name up to 176px</td><td>Margin notes in articles; 3-up related</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="clean">
+    <li>Choose the nav by pointer as well as width: <code>@media (hover: hover) and (pointer: fine)</code> plus ≥1024px gets the top bar; everything else gets the dock.</li>
+    <li>Pad the dock with <code>env(safe-area-inset-bottom)</code> and add bottom padding to <code>main</code> equal to the dock height, so it never covers the last content.</li>
+    <li>Use <code>100svh</code>, not <code>100vh</code>, if anything needs viewport height; the hero is sized by its content.</li>
+    <li>Touch targets are ≥44px. Hover-only details (portrait color, card notes) have a tap or in-view equivalent.</li>
+    <li>Images use <code>next/image</code> with real <code>sizes</code>, AVIF/WebP, and a blurred placeholder.</li>
+  </ul>
+</section>
+
+<section id="motion">
+  <div class="sec-head">
+    <span class="path">/<b>motion</b></span>
+    <h2>Animation guidelines</h2>
+    <p>Motion explains change: where something came from, what is now active, that an action worked. It never delays reading. One orchestrated moment on first load, then small, fast responses.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Token</th><th>Value</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td>dur-instant</td><td>100ms</td><td>Press, color changes, focus</td></tr>
+        <tr><td>dur-fast</td><td>180ms</td><td>Hover, tooltips, chips, toasts</td></tr>
+        <tr><td>dur-base</td><td>280ms</td><td>Sheets, menus, filter re-layout</td></tr>
+        <tr><td>dur-slow</td><td>520ms</td><td>Hero load sequence, page transitions</td></tr>
+        <tr><td>ease-out</td><td><code>cubic-bezier(.2,.8,.2,1)</code></td><td>Anything entering</td></tr>
+        <tr><td>ease-in-out</td><td><code>cubic-bezier(.65,0,.35,1)</code></td><td>Movement from A to B</td></tr>
+        <tr><td>spring (Motion)</td><td><code>{ stiffness: 420, damping: 38 }</code></td><td>Dock, sheet drag, nav underline</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid g2">
+    <div class="panel">
+      <h4>Where motion happens</h4>
+      <ul class="clean">
+        <li><strong>First load (home only, once per session)</strong>: <code>FoldText</code> folds “Parsa” down letter by letter from a top hinge (550ms per letter, 35ms apart), “Alizadeh” follows 120ms later, then the intro and CTAs fade in and the Lattice assembles. About 900ms in total. The fold is pure CSS, so it starts on first paint before JavaScript loads, and it plays once per page load.</li>
+        <li><strong>Scroll reveals</strong>: sections fade from 0.001 opacity with 12px rise, once, at 15% visibility. Lists stagger 40ms per item and cap at 6 items.</li>
+        <li><strong>Page transitions</strong>: 180ms cross-fade via the View Transitions API. Project titles and article covers morph between list and detail.</li>
+        <li><strong>Lattice</strong>: slow rotation (one turn per ~90s), leans toward the cursor with damping, pauses when off-screen or the tab is hidden.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h4>Rules</h4>
+      <ul class="clean">
+        <li>Animate only <code>transform</code>, <code>opacity</code> and <code>clip-path</code>. Never width, height, top or left.</li>
+        <li>Content must be visible without JavaScript. Reveal states are applied by JS after hydration, never as initial CSS <code>opacity: 0</code>.</li>
+        <li><code>prefers-reduced-motion: reduce</code>: no load sequence, no reveals, no parallax, Lattice replaced by the poster. Fades of 100ms or less are allowed.</li>
+        <li>No scroll-jacking, no smooth-scroll libraries, no custom cursor, no text scrambling, at most one self-running element per page: the home stack <code>LogoLoop</code> and the /work <code>DriftWall</code> (desktop only). Both are slow, pause on hover, have a visible pause button (WCAG 2.2.2), and sleep offscreen. With reduced motion the strip becomes a static wrapped row and the wall stands still. <code>ScrollVelocity</code> in the contact band moves only while the reader scrolls.</li>
+        <li>Nothing loops forever except the spinner, the skeleton shimmer, and the two pausable elements above.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section id="build">
+  <div class="sec-head">
+    <span class="path">/<b>build</b></span>
+    <h2>Implementation guide</h2>
+    <p>Stack: Next.js (App Router) · React · TypeScript (strict) · Tailwind CSS v4 · Three.js through React Three Fiber · Motion (<code>motion/react</code>) · next-themes · MDX. The token file below is also saved in the project as <code>design/globals.css</code>.</p>
+  </div>
+
+  <div class="panel">
+    <h4>1 · Tokens in Tailwind v4 (app/globals.css)</h4>
+<pre><span class="k">@import</span> <span class="s">"tailwindcss"</span>;
+<span class="k">@custom-variant</span> dark (&amp;:where([data-theme=dark], [data-theme=dark] *));
+
+<span class="k">:root</span> {
+  --paper:#F1F2EE; --paper-2:#E7E9E3; --surface:#FAFAF7;
+  --ink:#121416; --ink-2:#4A4F55; --ink-3:#7C8288;
+  --line:#D5D8D1; --line-strong:#B9BDB5;
+  --signal:#2A36E8; --signal-ink:#FFFFFF; --signal-soft:#DDE0FF;
+  --ok:#1E7F4F; --warn:#9A6400; --err:#C0342B; --err-soft:#F8E1DE;
+}
+<span class="k">[data-theme=dark]</span> {
+  --paper:#0F1112; --paper-2:#16191B; --surface:#1A1D20;
+  --ink:#E9EBE6; --ink-2:#A9AEB2; --ink-3:#737980;
+  --line:#2A2E32; --line-strong:#3A3F44;
+  --signal:#8391FF; --signal-ink:#0B0D1F; --signal-soft:#1E2350;
+  --ok:#5CC98E; --warn:#E3B04B; --err:#FF7A6E; --err-soft:#3A1B18;
+}
+
+<span class="k">@theme inline</span> {
+  --color-paper: var(--paper);   --color-paper-2: var(--paper-2);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink); --color-ink-2: var(--ink-2); --color-ink-3: var(--ink-3);
+  --color-line: var(--line); --color-line-strong: var(--line-strong);
+  --color-signal: var(--signal); --color-signal-ink: var(--signal-ink);
+  --color-signal-soft: var(--signal-soft);
+  --color-ok: var(--ok); --color-warn: var(--warn);
+  --color-err: var(--err); --color-err-soft: var(--err-soft);
+
+  --font-display: var(--font-familjen), ui-sans-serif, system-ui, sans-serif;
+  --font-prose: var(--font-newsreader), Georgia, serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --text-display-xl: clamp(3.5rem, 1.6rem + 8.4vw, 11rem);
+  --text-display: clamp(2.5rem, 1.8rem + 3vw, 4.5rem);
+  --text-h1: clamp(2rem, 1.7rem + 1.5vw, 3rem);
+  --text-h2: clamp(1.5rem, 1.35rem + .75vw, 2rem);
+  --text-prose: clamp(1.1875rem, 1.14rem + .2vw, 1.3125rem);
+
+  --radius-xs: 2px; --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px;
+  --ease-out: cubic-bezier(.2,.8,.2,1);
+  --ease-in-out: cubic-bezier(.65,0,.35,1);
+  --shadow-float: 0 8px 24px -8px rgb(18 20 22 / .18);
+}
+
+<span class="k">body</span> { @apply bg-paper text-ink font-display antialiased; }
+<span class="k">:focus-visible</span> { @apply outline-2 outline-offset-3 outline-signal rounded-xs; }</pre>
+    <p class="note">Theme: <code>next-themes</code> with <code>attribute="data-theme"</code>, <code>defaultTheme="system"</code>, and <code>disableTransitionOnChange</code>. The toggle cycles System → Light → Dark and shows the current choice in its label.</p>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <h4>2 · Fonts (app/layout.tsx)</h4>
+<pre><span class="k">import</span> { Familjen_Grotesk, Newsreader, JetBrains_Mono } <span class="k">from</span> <span class="s">"next/font/google"</span>;
+
+<span class="k">const</span> display = Familjen_Grotesk({
+  subsets: [<span class="s">"latin"</span>], variable: <span class="s">"--font-familjen"</span>, display: <span class="s">"swap"</span> });
+<span class="k">const</span> prose = Newsreader({
+  subsets: [<span class="s">"latin"</span>], variable: <span class="s">"--font-newsreader"</span>,
+  style: [<span class="s">"normal"</span>, <span class="s">"italic"</span>], display: <span class="s">"swap"</span> });
+<span class="k">const</span> mono = JetBrains_Mono({
+  subsets: [<span class="s">"latin"</span>], variable: <span class="s">"--font-jetbrains"</span>, display: <span class="s">"swap"</span> });
+
+<span class="c">// &lt;html className={`${display.variable} ${prose.variable} ${mono.variable}`}</span>
+<span class="c">//       suppressHydrationWarning&gt;</span></pre>
+    </div>
+    <div class="panel">
+      <h4>3 · Button with variants</h4>
+<pre><span class="k">const</span> button = cva(
+  <span class="s">"inline-flex items-center gap-2.5 rounded-sm font-semibold
+   transition duration-150 ease-out active:translate-y-px
+   disabled:opacity-45 disabled:pointer-events-none"</span>,
+  { variants: {
+      intent: {
+        primary:   <span class="s">"bg-signal text-signal-ink hover:bg-signal/85"</span>,
+        secondary: <span class="s">"border border-line-strong hover:border-ink hover:bg-surface"</span>,
+        ghost:     <span class="s">"text-ink-2 hover:text-ink hover:bg-paper-2"</span>,
+      },
+      size: { md: <span class="s">"h-11 px-[18px] text-[15px]"</span>, sm: <span class="s">"h-9 px-3 text-sm"</span> },
+    },
+    defaultVariants: { intent: <span class="s">"primary"</span>, size: <span class="s">"md"</span> } });</pre>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>4 · The Lattice (Three.js via React Three Fiber)</h4>
+<pre><span class="c">// components/three/Lattice.tsx — client component, loaded only where it will run</span>
+<span class="k">const</span> LatticeCanvas = dynamic(() =&gt; <span class="k">import</span>(<span class="s">"./LatticeCanvas"</span>), {
+  ssr: <span class="k">false</span>, loading: () =&gt; &lt;LatticePoster /&gt; });
+
+<span class="k">export function</span> Lattice() {
+  <span class="k">const</span> canRun = useCanRunWebGL();  <span class="c">// ≥1024px, fine pointer, no reduced motion,</span>
+                                   <span class="c">// no Save-Data, WebGL2 available</span>
+  <span class="k">return</span> canRun ? &lt;LatticeCanvas /&gt; : &lt;LatticePoster /&gt;;
+}
+
+<span class="c">// LatticeCanvas: ~1,800 points on a deformed icosahedral lattice + nearest-neighbour lines</span>
+&lt;Canvas dpr={[1, 1.75]} gl={{ antialias: <span class="k">false</span>, powerPreference: <span class="s">"low-power"</span> }}
+        frameloop={visible ? <span class="s">"always"</span> : <span class="s">"never"</span>} camera={{ fov: 35, position: [0,0,6] }}&gt;
+  &lt;LatticePoints color={tokens.ink} accent={tokens.signal} /&gt;  <span class="c">// colors read from CSS vars</span>
+&lt;/Canvas&gt;</pre>
+    <ul class="clean">
+      <li>One <code>THREE.Points</code> and one <code>LineSegments</code> using <code>BufferGeometry</code>. A tiny custom shader handles point size and distance fade. No post-processing, no textures, no model files. Target under 60KB gzipped for the chunk (import from <code>three</code> selectively).</li>
+      <li>About 6% of points use the signal color; the rest are ink at 55% opacity. Re-read the colors on theme change.</li>
+      <li>Pointer lean: lerp rotation toward the pointer by 0.04 per frame, max ±12°. Pause with an IntersectionObserver and on <code>visibilitychange</code>.</li>
+      <li>The poster is a pre-rendered transparent PNG/WebP of the same lattice (light and dark versions), so layout doesn't move when WebGL swaps in.</li>
+    </ul>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <h4>5 · Budgets and checks</h4>
+      <ul class="clean">
+        <li>Lighthouse mobile ≥ 95 for performance and 100 for accessibility.</li>
+        <li>LCP &lt; 2.0s on 4G (the LCP element is the name, which is text, so it is fast). CLS &lt; 0.02. INP &lt; 150ms.</li>
+        <li>First-load JS for routes other than home: &lt; 110KB gzipped. Three.js loads only on the home hero on desktop.</li>
+        <li>Keyboard: every action reachable, skip link to <code>main</code>, sheet and command menu trap focus and restore it.</li>
+        <li>Check contrast of every token pair in both themes; test at 200% zoom and at 320px width.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h4>6 · Build order</h4>
+      <ol class="clean">
+        <li>Tokens, fonts, theme toggle, <code>ui/</code> primitives.</li>
+        <li>Layout shell: header, dock, More sheet, footer, route progress.</li>
+        <li>Content layer (MDX, Zod schemas, reading time).</li>
+        <li>Log index and article (the most-visited pages over time).</li>
+        <li>Work index, project page, spec sheet.</li>
+        <li>Home (poster first), About, Stack, Contact with route handler, 404.</li>
+        <li>The Lattice, view transitions and load sequence last, behind the fallbacks that already work.</li>
+      </ol>
+      <p class="note">The order is a real dependency chain: each step uses what the earlier ones built.</p>
+    </div>
+  </div>
+</section>
+
+<footer style="padding-block:40px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+  <div class="mark"><div class="mono-mark">PA</div><span>Parsa Alizadeh · identity &amp; interface system</span></div>
+  <span class="path">v1.0 · 2026-09-19 · UI/UX only; SEO comes later</span>
+</footer>
+</div>

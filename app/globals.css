@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+/* Desktop layout = wide screen AND a mouse. Below this, phones and tablets get the dock. */
+@custom-variant desk {
+  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) { @slot; }
+}
+
+/* ---------- Tokens: Source & Signal ---------- */
+:root {
+  --paper: #F1F2EE; --paper-2: #E7E9E3; --surface: #FAFAF7;
+  --ink: #121416; --ink-2: #4A4F55; --ink-3: #6E747A;
+  --line: #D5D8D1; --line-strong: #B9BDB5;
+  --signal: #2A36E8; --signal-ink: #FFFFFF; --signal-soft: #DDE0FF;
+  --ok: #1E7F4F; --warn: #9A6400; --err: #C0342B; --err-soft: #F8E1DE;
+  --shadow-float-color: rgb(18 20 22 / .18);
+  --code-bg: #0F1112; --code-ink: #DADDD6;
+}
+
+[data-theme=dark] {
+  --paper: #0F1112; --paper-2: #16191B; --surface: #1A1D20;
+  --ink: #E9EBE6; --ink-2: #A9AEB2; --ink-3: #868C92;
+  --line: #2A2E32; --line-strong: #3A3F44;
+  --signal: #8391FF; --signal-ink: #0B0D1F; --signal-soft: #1E2350;
+  --ok: #5CC98E; --warn: #E3B04B; --err: #FF7A6E; --err-soft: #3A1B18;
+  --shadow-float-color: rgb(0 0 0 / .5);
+  --code-bg: #16191B; --code-ink: #DADDD6;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-signal-soft: var(--signal-soft);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-err: var(--err);
+  --color-err-soft: var(--err-soft);
+
+  --font-display: var(--font-familjen), ui-sans-serif, system-ui, sans-serif;
+  --font-prose: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-display-xl: clamp(3.5rem, 1.6rem + 8.4vw, 11rem);
+  --text-display-xl--line-height: .84;
+  --text-display-xl--letter-spacing: -.055em;
+  --text-display: clamp(2.5rem, 1.8rem + 3vw, 4.5rem);
+  --text-display--line-height: .95;
+  --text-display--letter-spacing: -.04em;
+  --text-h1: clamp(2rem, 1.7rem + 1.5vw, 3rem);
+  --text-h1--line-height: 1.05;
+  --text-h1--letter-spacing: -.03em;
+  --text-h2: clamp(1.5rem, 1.35rem + .75vw, 2rem);
+  --text-h2--line-height: 1.15;
+  --text-h2--letter-spacing: -.02em;
+  --text-h3: 1.25rem;
+  --text-h3--line-height: 1.3;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.6;
+  --text-prose: clamp(1.1875rem, 1.14rem + .2vw, 1.3125rem);
+  --text-prose--line-height: 1.7;
+  --text-label: .8125rem;
+  --text-label--letter-spacing: .08em;
+
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-float: 0 8px 24px -8px var(--shadow-float-color);
+
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+}
+
+@layer base {
+  html { color-scheme: light; -webkit-text-size-adjust: 100%; }
+  [data-theme=dark] { color-scheme: dark; }
+  body { @apply bg-paper text-ink font-display antialiased; font-size: 16px; line-height: 1.55; }
+  h1, h2, h3, h4 { text-wrap: balance; }
+  p, li { text-wrap: pretty; }
+  :focus-visible { @apply outline-2 outline-offset-3 outline-signal rounded-xs; }
+  ::selection { background: var(--signal-soft); color: var(--ink); }
+  .tabular { font-variant-numeric: tabular-nums; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* View transitions between routes: a short cross-fade. */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 180ms; }
+
+/* ---------- The Log: article prose ---------- */
+.prose { font-family: var(--font-prose); font-size: var(--text-prose); line-height: 1.7; color: var(--ink); max-width: 68ch; }
+.prose > * + * { margin-top: 1.1em; }
+.prose h2 { font-family: var(--font-display); font-size: var(--text-h2); line-height: 1.15; letter-spacing: -.02em; font-weight: 600; margin-top: 2em; scroll-margin-top: 96px; }
+.prose h3 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; margin-top: 1.6em; scroll-margin-top: 96px; }
+.prose h2 + *, .prose h3 + * { margin-top: .6em; }
+.prose a { color: var(--signal); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.prose strong { font-weight: 600; }
+.prose ul, .prose ol { padding-left: 1.25em; }
+.prose ul { list-style: disc; } .prose ol { list-style: decimal; }
+.prose li + li { margin-top: .35em; }
+.prose li::marker { color: var(--ink-3); }
+.prose blockquote { border-left: 2px solid var(--line-strong); padding-left: 1em; color: var(--ink-2); font-style: italic; }
+.prose hr { border: 0; border-top: 1px solid var(--line); margin-block: 2.5em; }
+.prose :not(pre) > code { font-family: var(--font-mono); font-size: .8em; background: var(--paper-2); border: 1px solid var(--line); padding: .1em .35em; border-radius: var(--radius-xs); }
+
+/* Code blocks (rehype-pretty-code + shiki): always dark, in both themes */
+.prose figure[data-rehype-pretty-code-figure] { margin-block: 1.6em; font-family: var(--font-mono); }
+.prose [data-rehype-pretty-code-title] {
+  font: 12px/1 var(--font-mono); color: var(--ink-3); background: var(--paper-2);
+  border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-md) var(--radius-md) 0 0;
+  padding: 10px 14px; width: max-content; max-width: 100%;
+}
+.prose pre {
+  font-size: 13.5px; line-height: 1.65; background: var(--code-bg) !important; color: var(--code-ink);
+  border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px 0; overflow-x: auto;
+}
+.prose [data-rehype-pretty-code-title] + pre { border-top-left-radius: 0; }
+.prose pre code { display: grid; }
+.prose pre [data-line] { padding-inline: 18px; }
+.prose pre [data-highlighted-line] { background: rgb(131 145 255 / .14); box-shadow: inset 2px 0 0 #8391FF; }
+
+/* Mobile "More" sheet */
+@keyframes sheet-in { from { transform: translateY(100%); } to { transform: none; } }
+
+/* ---------- Pill controls: ink (or accent) rises from below on hover / keyboard focus ---------- */
+html { scroll-behavior: smooth; }
+.fx-fill { position: relative; overflow: hidden; isolation: isolate; }
+.fx-fill::before {
+  content: ""; position: absolute; left: 50%; bottom: 0; z-index: -1;
+  width: calc(100% + 24px); aspect-ratio: 1; border-radius: 50%;
+  background: var(--fx-fill, var(--ink));
+  transform: translate(-50%, 50%) scale(0);
+  transition: transform .42s var(--ease-out);
+}
+.fx-fill:hover::before, .fx-fill:focus-visible::before { transform: translate(-50%, 50%) scale(1.3); }
+/* Label swap: the label slides up and a copy in the hover colour slides in. */
+.fx-label { display: grid; height: 1lh; overflow: hidden; }
+.fx-label > span { grid-area: 1 / 1; transition: transform .42s var(--ease-out); }
+.fx-label > span + span { transform: translateY(110%); color: var(--fx-text, var(--paper)); }
+.fx-fill:hover .fx-label > span:first-child, .fx-fill:focus-visible .fx-label > span:first-child { transform: translateY(-110%); }
+.fx-fill:hover .fx-label > span + span, .fx-fill:focus-visible .fx-label > span + span { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .fx-fill::before, .fx-label > span { transition: none; }
+}
+
+/* Article tables (GitHub-flavoured Markdown) */
+.prose table { display: block; overflow-x: auto; border-collapse: collapse; font-family: var(--font-display); font-size: 15px; line-height: 1.5; max-width: 100%; }
+.prose th, .prose td { border-bottom: 1px solid var(--line); padding: 10px 14px; text-align: left; vertical-align: top; }
+.prose th { font-family: var(--font-mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); }
+.prose tr:last-child td { border-bottom: 0; }
+/* Sources list at the end of every article */
+.prose h2#sources + ol, .prose h2#sources + ul { font-family: var(--font-display); font-size: 15px; line-height: 1.55; }
