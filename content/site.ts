@@ -31,7 +31,7 @@ export const site = {
     'Tailwind CSS'
   ],
   /** Fallback only: set NEXT_PUBLIC_SITE_URL to the real domain (see lib/site-url.ts). */
-  url: 'https://parsaalizadeh.dev',
+  url: 'https://www.parsa-alizadeh.com',
   email: 'parsa.alizadeh.inet@gmail.com',
   /** IANA time zone for the "local time" in the status line */
   timeZone: 'Europe/Istanbul', // from the GitHub profile location
