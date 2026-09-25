@@ -1,5 +1,6 @@
 import { site } from '@/content/site';
 import { getArticles } from '@/lib/content';
+import { SITE_URL } from '@/lib/site-url';
 
 export const dynamic = 'force-static';
 
@@ -10,8 +11,8 @@ export function GET() {
     .map(
       a => `    <item>
       <title>${esc(a.title)}</title>
-      <link>${site.url}/blog/${a.slug}</link>
-      <guid>${site.url}/blog/${a.slug}</guid>
+      <link>${SITE_URL}/blog/${a.slug}</link>
+      <guid>${SITE_URL}/blog/${a.slug}</guid>
       <pubDate>${a.date.toUTCString()}</pubDate>
       <description>${esc(a.description)}</description>
     </item>`
@@ -22,7 +23,7 @@ export function GET() {
 <rss version="2.0">
   <channel>
     <title>Blog · ${esc(site.name)}</title>
-    <link>${site.url}/#blog</link>
+    <link>${SITE_URL}/#blog</link>
     <description>Notes on building for the web, mobile and AI.</description>
 ${items}
   </channel>
