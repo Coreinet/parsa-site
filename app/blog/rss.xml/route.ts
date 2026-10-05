@@ -23,7 +23,7 @@ export function GET() {
 <rss version="2.0">
   <channel>
     <title>Blog · ${esc(site.name)}</title>
-    <link>${SITE_URL}/#blog</link>
+    <link>${SITE_URL}/blog</link>
     <description>Notes on building for the web, mobile and AI.</description>
 ${items}
   </channel>

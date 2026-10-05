@@ -12,7 +12,8 @@ import { absoluteUrl, SITE_URL } from '@/lib/site-url';
  *   WebSite ──publisher/author──▶ Person ◀──mainEntity── ProfilePage (/about)
  *   Blog ──author──▶ Person        BlogPosting ──author──▶ Person, ──isPartOf──▶ Blog
  *   SoftwareSourceCode/CreativeWork ──author──▶ Person
- *   CollectionPage (/topics/x) ──hasPart──▶ articles and projects
+ *   CollectionPage (/work, /blog, /stack, /topics/x) ──mainEntity──▶ ItemList of pages
+ *   ContactPage (/contact) ──about──▶ Person
  */
 
 export const PERSON_ID = `${SITE_URL}/#person`;
@@ -75,7 +76,7 @@ export function blogSchema(articles: Article[]): Json {
   return {
     '@type': 'Blog',
     '@id': BLOG_ID,
-    url: absoluteUrl('/#blog'),
+    url: absoluteUrl('/blog'),
     name: `Blog – ${site.name}`,
     description: 'Articles on web development, mobile development, AI engineering and search, with sources.',
     inLanguage: 'en',
@@ -186,6 +187,45 @@ export function topicSchema(topic: Topic, articles: Article[], projects: Project
       '@type': 'ItemList',
       itemListElement: parts.map((p, i) => ({ '@type': 'ListItem', position: i + 1, url: p.url, name: p.name }))
     },
+    inLanguage: 'en'
+  };
+}
+
+/** Index pages (/work, /blog, /stack): a CollectionPage whose main entity lists its items. */
+export function collectionPageSchema(path: string, name: string, description: string, items: { name: string; path: string }[]): Json {
+  const url = absoluteUrl(path);
+  return {
+    '@type': 'CollectionPage',
+    '@id': `${url}#page`,
+    url,
+    name,
+    description,
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': PERSON_ID },
+    author: { '@id': PERSON_ID },
+    ...(items.length
+      ? {
+          mainEntity: {
+            '@type': 'ItemList',
+            itemListElement: items.map((item, i) => ({ '@type': 'ListItem', position: i + 1, url: absoluteUrl(item.path), name: item.name }))
+          }
+        }
+      : {}),
+    inLanguage: 'en'
+  };
+}
+
+export function contactPageSchema(description: string): Json {
+  const url = absoluteUrl('/contact');
+  return {
+    '@type': 'ContactPage',
+    '@id': `${url}#page`,
+    url,
+    name: `Contact ${site.name}`,
+    description,
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': PERSON_ID },
+    mainEntity: { '@id': PERSON_ID },
     inLanguage: 'en'
   };
 }

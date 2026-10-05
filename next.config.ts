@@ -30,15 +30,11 @@ const nextConfig: NextConfig = {
       }
     ];
   },
-  // Single-page site: the old standalone pages now live as sections on the home page.
+  // Old URLs from earlier versions of the site.
   async redirects() {
     return [
-      { source: '/work', destination: '/#work', permanent: true },
-      { source: '/stack', destination: '/#stack', permanent: true },
-      { source: '/contact', destination: '/#contact', permanent: true },
-      { source: '/log', destination: '/#blog', permanent: true },
-      { source: '/blog', destination: '/#blog', permanent: true },
-      { source: '/log/category/:category', destination: '/#blog', permanent: true },
+      { source: '/log', destination: '/blog', permanent: true },
+      { source: '/log/category/:category', destination: '/blog', permanent: true },
       { source: '/log/rss.xml', destination: '/blog/rss.xml', permanent: true },
       { source: '/log/:slug', destination: '/blog/:slug', permanent: true }
     ];

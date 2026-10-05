@@ -156,13 +156,41 @@ export function PathLabel({ path, className }: { path: string; className?: strin
   );
 }
 
-/** A home-page section. `id` is the nav anchor; scroll-margin keeps it clear of the header. */
+/** Visible breadcrumb trail; the last item is the current page. Pair with breadcrumbSchema. */
+export function Breadcrumb({ items, className }: { items: { name: string; href: string }[]; className?: string }) {
+  return (
+    <nav aria-label="Breadcrumb" className={className}>
+      <ol className="flex flex-wrap items-center gap-2 font-mono text-xs text-ink-3">
+        {items.map((item, i) =>
+          i === items.length - 1 ? (
+            <li key={item.href} aria-current="page" className="text-signal">
+              {item.name}
+            </li>
+          ) : (
+            <li key={item.href} className="flex items-center gap-2">
+              <Link href={item.href} className="hover:text-ink">
+                {item.name}
+              </Link>
+              <span aria-hidden="true">/</span>
+            </li>
+          )
+        )}
+      </ol>
+    </nav>
+  );
+}
+
+/**
+ * A section of content. On the home page (`page` unset) it is a preview with an h2 and an
+ * `id` anchor. On its own page (`page` set) the title becomes the page's h1 under a breadcrumb.
+ */
 export function Section({
   id,
   path,
   title,
   intro,
   action,
+  page,
   children,
   className
 }: {
@@ -171,17 +199,29 @@ export function Section({
   title?: ReactNode;
   intro?: ReactNode;
   action?: ReactNode;
+  /** Breadcrumb name of the standalone page; renders the title as h1. */
+  page?: string;
   children: ReactNode;
   className?: string;
 }) {
+  const Heading = page ? 'h1' : 'h2';
   return (
-    <section id={id} className={cn('scroll-mt-20 py-[clamp(64px,8vw,112px)]', className)}>
+    <section id={id} className={cn(page ? 'pb-[clamp(64px,8vw,112px)] pt-[clamp(40px,7vw,88px)]' : 'scroll-mt-20 py-[clamp(64px,8vw,112px)]', className)}>
       <Container className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:gap-12">
         {(path || title) && (
           <div className="flex flex-wrap items-end justify-between gap-5">
             <div className="grid max-w-[62ch] gap-3">
-              {path ? <PathLabel path={path} /> : null}
-              {title ? <h2 className="text-display font-semibold">{title}</h2> : null}
+              {page && path ? (
+                <Breadcrumb
+                  items={[
+                    { name: 'Home', href: '/' },
+                    { name: page, href: path }
+                  ]}
+                />
+              ) : path ? (
+                <PathLabel path={path} />
+              ) : null}
+              {title ? <Heading className="text-display font-semibold">{title}</Heading> : null}
               {intro ? <p className="text-body-lg text-ink-2">{intro}</p> : null}
             </div>
             {action}

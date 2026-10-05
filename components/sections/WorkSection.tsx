@@ -1,21 +1,36 @@
 import { ProjectCard } from '@/components/work/ProjectCard';
 import WorkFilters from '@/components/work/WorkFilters';
-import { Section } from '@/components/ui/primitives';
+import { Section, TextLink } from '@/components/ui/primitives';
 import { site } from '@/content/site';
 import { getProjects, PROJECT_TYPES } from '@/lib/content';
 
 const github = site.socials.find(s => s.label === 'GitHub');
 
-export default function WorkSection() {
+/** Home: featured project plus a few more, linking to /work. Page: every project. */
+export default function WorkSection({ page = false }: { page?: boolean }) {
   const projects = getProjects();
   const featured = projects.find(p => p.featured) ?? projects[0];
-  const others = projects.filter(p => p !== featured);
+  const rest = projects.filter(p => p !== featured);
+  const others = page ? rest : rest.slice(0, 4);
   const types = (Object.keys(PROJECT_TYPES) as (keyof typeof PROJECT_TYPES)[])
     .map(value => ({ value, label: PROJECT_TYPES[value], count: others.filter(p => p.type === value).length }))
     .filter(t => t.count > 0);
 
   return (
-    <Section id="work" path="/work" title="Selected work" intro={projects.length ? 'A few projects, each with a short case study: the problem, the approach, and what changed.' : undefined}>
+    <Section
+      id={page ? undefined : 'work'}
+      path="/work"
+      page={page ? 'Work' : undefined}
+      title={page ? `Work by ${site.name}` : 'Selected work'}
+      intro={
+        projects.length
+          ? page
+            ? `Web, mobile and AI projects by ${site.name}, each with a short case study: the problem, the approach, and what changed.`
+            : 'A few projects, each with a short case study: the problem, the approach, and what changed.'
+          : undefined
+      }
+      action={page || !projects.length ? undefined : <TextLink href="/work">All projects</TextLink>}
+    >
       {projects.length === 0 ? (
         <div className="grid justify-items-start gap-3 rounded-2xl border border-dashed border-line-strong p-6 sm:p-8">
           <p className="text-lg font-semibold">Case studies are being written.</p>

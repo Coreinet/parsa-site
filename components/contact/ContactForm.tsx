@@ -68,8 +68,8 @@ export default function ContactForm({ email }: { email: string }) {
         body: JSON.stringify({ ...values, type })
       });
       const body = (await res.json().catch(() => ({}))) as { error?: string; fallback?: string };
-      if (res.status === 503 && body.fallback === 'mailto') {
-        // No email service configured yet: open the visitor's email app with the message filled in.
+      if (body.fallback === 'mailto') {
+        // Email service missing or refusing: open the visitor's email app with the message filled in.
         const text = `${values.message}\n\n—\n${values.name} <${values.email}>\nType: ${type}\nBudget: ${values.budget || 'not given'}`;
         const href = `mailto:${email}?subject=${encodeURIComponent(`New ${type} inquiry from ${values.name}`)}&body=${encodeURIComponent(text)}`;
         setState({ kind: 'mailto', href });

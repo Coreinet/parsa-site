@@ -7,7 +7,6 @@ import { absoluteUrl } from '@/lib/site-url';
 /**
  * Every indexable URL, with image entries (image sitemap) for the portrait, article covers
  * and project covers. Example content is excluded in production by getArticles/getProjects.
- * Section anchors (/#work) are not separate URLs, so only real pages are listed.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const articles = getArticles();
@@ -30,6 +29,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
       images: [absoluteUrl(site.portrait.src)]
     },
+    {
+      url: absoluteUrl('/work'),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      images: projects.map(p => absoluteUrl(p.cover))
+    },
+    {
+      url: absoluteUrl('/blog'),
+      ...(latest ? { lastModified: latest } : {}),
+      changeFrequency: 'weekly',
+      priority: 0.9
+    },
+    { url: absoluteUrl('/stack'), changeFrequency: 'monthly', priority: 0.6 },
+    { url: absoluteUrl('/contact'), changeFrequency: 'yearly', priority: 0.7 },
     ...topics.map(t => ({
       url: absoluteUrl(`/topics/${t.id}`),
       ...(latest ? { lastModified: latest } : {}),

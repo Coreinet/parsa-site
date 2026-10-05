@@ -40,7 +40,7 @@ export default function PortraitCard({
   name,
   status,
   available = false,
-  contactHref = '/#contact',
+  contactHref = '/contact',
   caption,
   maxTilt = 6,
   priority = false,

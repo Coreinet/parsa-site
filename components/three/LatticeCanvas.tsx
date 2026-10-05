@@ -131,6 +131,7 @@ export default function LatticeCanvas({ onReady }: { onReady?: () => void }) {
     ro.observe(host);
 
     // Pointer lean, damped. One full turn roughly every 90s.
+    let spin = 0;
     const pointer = { x: 0, y: 0 };
     const lean = { x: 0, y: 0 };
     const onPointer = (e: PointerEvent): void => {
@@ -138,6 +139,31 @@ export default function LatticeCanvas({ onReady }: { onReady?: () => void }) {
       pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
     };
     window.addEventListener('pointermove', onPointer, { passive: true });
+
+    // Drag to spin: the sphere follows the finger/mouse, then coasts and settles back to the idle spin.
+    let dragging = false;
+    let dragX = 0;
+    let velocity = 0;
+    const onDown = (e: PointerEvent): void => {
+      dragging = true;
+      dragX = e.clientX;
+      velocity = 0;
+      host.setPointerCapture(e.pointerId);
+    };
+    const onMove = (e: PointerEvent): void => {
+      if (!dragging) return;
+      const dx = (e.clientX - dragX) / Math.max(1, host.clientWidth);
+      dragX = e.clientX;
+      spin += dx * Math.PI * 1.6;
+      velocity = velocity * 0.5 + dx * Math.PI * 1.6 * 30;
+    };
+    const onUp = (): void => {
+      dragging = false;
+    };
+    host.addEventListener('pointerdown', onDown);
+    host.addEventListener('pointermove', onMove);
+    host.addEventListener('pointerup', onUp);
+    host.addEventListener('pointercancel', onUp);
 
     // Theme changes: re-read colours.
     const mo = new MutationObserver(() => {
@@ -151,7 +177,6 @@ export default function LatticeCanvas({ onReady }: { onReady?: () => void }) {
     let raf = 0;
     let visible = true;
     let last = performance.now();
-    let spin = 0;
     const start = performance.now();
     let ready = false;
 
@@ -163,6 +188,10 @@ export default function LatticeCanvas({ onReady }: { onReady?: () => void }) {
       material.uniforms.uAssemble.value = 1 - Math.pow(1 - assemble, 3);
       material.uniforms.uTime.value = t;
       spin += dt * ((Math.PI * 2) / 90);
+      if (!dragging) {
+        spin += velocity * dt;
+        velocity *= Math.exp(-dt / 0.9);
+      }
       lean.x += (pointer.x * 0.21 - lean.x) * (1 - Math.exp(-dt / 0.4));
       lean.y += (pointer.y * 0.21 - lean.y) * (1 - Math.exp(-dt / 0.4));
       points.rotation.y = 0.5 + spin + lean.x;
@@ -195,6 +224,10 @@ export default function LatticeCanvas({ onReady }: { onReady?: () => void }) {
       ro.disconnect();
       mo.disconnect();
       window.removeEventListener('pointermove', onPointer);
+      host.removeEventListener('pointerdown', onDown);
+      host.removeEventListener('pointermove', onMove);
+      host.removeEventListener('pointerup', onUp);
+      host.removeEventListener('pointercancel', onUp);
       document.removeEventListener('visibilitychange', kick);
       points.geometry.dispose();
       material.dispose();
@@ -203,5 +236,5 @@ export default function LatticeCanvas({ onReady }: { onReady?: () => void }) {
     };
   }, [onReady]);
 
-  return <div ref={hostRef} className="absolute inset-0" />;
+  return <div ref={hostRef} className="absolute inset-0 cursor-grab touch-pan-y select-none active:cursor-grabbing" />;
 }

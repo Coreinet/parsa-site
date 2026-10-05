@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 const LatticeCanvas = dynamic(() => import('./LatticeCanvas'), { ssr: false });
 
-const QUERY = '(min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)';
+const QUERY = '(prefers-reduced-motion: no-preference)';
 
 function canRunWebGL(): boolean {
   if (!window.matchMedia(QUERY).matches) return false;
@@ -20,9 +20,10 @@ function canRunWebGL(): boolean {
 }
 
 /**
- * The home hero's one 3D moment. The static poster renders first (and stays on phones, with
- * reduced motion, Save-Data or no WebGL 2); the WebGL canvas loads only on desktop and fades
- * in over the poster once its first frame is drawn, so layout never moves.
+ * The home hero's one 3D moment. The static poster renders first (and stays with reduced
+ * motion, Save-Data or no WebGL 2); the WebGL canvas loads after it on every screen size and
+ * fades in over the poster once its first frame is drawn, so layout never moves.
+ * Drag it sideways (finger or mouse) to spin it.
  */
 export default function Lattice({ className = '' }: { className?: string }) {
   const [run, setRun] = useState(false);

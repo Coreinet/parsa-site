@@ -16,7 +16,7 @@ export const metadata = pageMetadata({
   path: '/'
 });
 
-/** The whole site on one page. Each section's id is a nav anchor (see content/nav.ts). */
+/** Overview of the whole site: each section previews its own page (/work, /about, /stack, /blog, /contact). */
 export default function HomePage() {
   return (
     <>

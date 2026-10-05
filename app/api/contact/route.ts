@@ -1,3 +1,4 @@
+import nodemailer from 'nodemailer';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -22,9 +23,11 @@ function limited(ip: string): boolean {
 }
 
 /**
- * Delivery: set RESEND_API_KEY and CONTACT_TO (and optionally CONTACT_FROM) to send email via
- * Resend. Without them, messages are only logged in development and refused in production,
- * so the form shows its error state with the email fallback instead of pretending it worked.
+ * Delivery: messages are sent from Parsa's Gmail to Parsa's inbox over Gmail SMTP.
+ * Set GMAIL_USER (the Gmail address) and GMAIL_APP_PASSWORD (a Google App Password, not the
+ * normal password); CONTACT_TO optionally sends to a different inbox. Without them, messages
+ * are only logged in development and refused in production, so the form falls back to the
+ * visitor's email app instead of pretending it worked.
  */
 export async function POST(request: Request) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'local';
@@ -41,10 +44,11 @@ export async function POST(request: Request) {
   // Bots fill the hidden field: accept silently, send nothing.
   if (data.company) return Response.json({ ok: true });
 
-  const key = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_TO;
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, ''); // Google shows it in groups of four
+  const to = process.env.CONTACT_TO || user;
 
-  if (!key || !to) {
+  if (!user || !pass || !to) {
     if (process.env.NODE_ENV !== 'production') {
       console.info('[contact] (dev, not sent)', data);
       return Response.json({ ok: true });
@@ -53,18 +57,22 @@ export async function POST(request: Request) {
     return Response.json({ error: 'The message service is not set up yet.', fallback: 'mailto' }, { status: 503 });
   }
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: process.env.CONTACT_FROM ?? 'Website <onboarding@resend.dev>',
-      to,
-      reply_to: data.email,
-      subject: `New ${data.type} inquiry from ${data.name}`,
-      text: `${data.message}\n\n—\n${data.name} <${data.email}>\nType: ${data.type}\nBudget: ${data.budget || 'not given'}`
-    })
-  });
+  // One line only: a name with line breaks must not be able to add mail headers.
+  const name = data.name.replace(/[\r\n]+/g, ' ');
+  const transport = nodemailer.createTransport({ service: 'gmail', auth: { user, pass } });
 
-  if (!res.ok) return Response.json({ error: 'The mail service did not accept the message.' }, { status: 502 });
+  try {
+    await transport.sendMail({
+      from: { name: `${name} via website`, address: user },
+      to,
+      replyTo: { name, address: data.email },
+      subject: `New ${data.type} inquiry from ${name}`,
+      text: `${data.message}\n\n—\n${name} <${data.email}>\nType: ${data.type}\nBudget: ${data.budget || 'not given'}`
+    });
+  } catch (err) {
+    // Visible in Vercel → Project → Logs. Usual cause: a wrong or revoked App Password.
+    console.error('[contact] Gmail refused the message', err);
+    return Response.json({ error: 'The mail service did not accept the message.', fallback: 'mailto' }, { status: 502 });
+  }
   return Response.json({ ok: true });
 }

@@ -57,13 +57,14 @@ export default async function ProjectPage(props: PageProps<'/work/[slug]'>) {
           projectSchema(project),
           breadcrumbSchema([
             { name: 'Home', path: '/' },
+            { name: 'Work', path: '/work' },
             { name: project.title, path: `/work/${project.slug}` }
           ])
         )}
       />
       <Container as="header" className="grid gap-6 pb-12 pt-[clamp(32px,6vw,72px)]">
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/#work" className="font-mono text-xs text-ink-3 hover:text-ink">
+          <Link href="/work" className="font-mono text-xs text-ink-3 hover:text-ink">
             ← All work
           </Link>
           <PathLabel path={`/work/${project.slug}`} />

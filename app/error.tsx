@@ -12,7 +12,7 @@ export default function Error({ error, retry }: { error: Error & { digest?: stri
       </p>
       <div className="flex flex-wrap gap-3">
         <Button onClick={retry} label="Try again" />
-        <ButtonLink href="/#home" intent="secondary" label="Go home" />
+        <ButtonLink href="/" intent="secondary" label="Go home" />
       </div>
     </Container>
   );

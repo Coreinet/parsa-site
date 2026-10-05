@@ -7,7 +7,7 @@ import Footer from '@/components/layout/Footer';
 import SiteHeader from '@/components/layout/SiteHeader';
 import ThemeToggle from '@/components/layout/ThemeToggle';
 import { getArticles, getProjects } from '@/lib/content';
-import { SECTIONS, sectionHref } from '@/content/nav';
+import { PAGES } from '@/content/nav';
 import { site } from '@/content/site';
 import { DEFAULT_OG_IMAGE } from '@/lib/metadata';
 import { SITE_URL } from '@/lib/site-url';
@@ -51,7 +51,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const entries: CommandEntry[] = [
-    ...SECTIONS.map(s => ({ group: 'Pages' as const, title: s.label, href: sectionHref(s.id) })),
+    ...PAGES.map(s => ({ group: 'Pages' as const, title: s.label, href: s.href })),
     ...getProjects().map(p => ({ group: 'Work' as const, title: p.title, href: `/work/${p.slug}`, hint: String(p.year) })),
     ...getArticles().map(a => ({ group: 'Blog' as const, title: a.title, href: `/blog/${a.slug}`, hint: a.category }))
   ];

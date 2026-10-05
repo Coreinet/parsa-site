@@ -13,12 +13,22 @@ export interface StackLayer {
 /**
  * /stack body. Desktop: a sticky OptionWheel of layer names on the left follows the layer
  * being read (scrollspy); turning or clicking it scrolls to that layer.
- * Phones: the wheel is hidden and each layer shows its own heading above its items.
+ * Phones: a sticky chip bar replaces the wheel, and each layer shows its own heading.
  */
 export default function StackLayers({ layers }: { layers: StackLayer[] }) {
   const [active, setActive] = useState(0);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const jumpingRef = useRef(false);
+  const chipsRef = useRef<HTMLUListElement>(null);
+
+  // Keep the active chip visible in the horizontally scrolling bar.
+  useEffect(() => {
+    const bar = chipsRef.current;
+    const chip = bar?.querySelector<HTMLElement>(`[data-chip="${active}"]`);
+    if (!bar || !chip || !bar.offsetParent) return;
+    const offset = chip.getBoundingClientRect().left - bar.getBoundingClientRect().left;
+    bar.scrollTo({ left: bar.scrollLeft + offset - (bar.clientWidth - chip.offsetWidth) / 2, behavior: 'smooth' });
+  }, [active]);
 
   // Scrollspy: the layer crossing a line 35% from the top is active.
   useEffect(() => {
@@ -62,6 +72,25 @@ export default function StackLayers({ layers }: { layers: StackLayer[] }) {
           />
         </div>
       </div>
+
+      {/* Phones and tablets: a sticky chip bar stands in for the wheel and follows the same scrollspy. */}
+      <nav aria-label="Stack layers" className="sticky top-[calc(env(safe-area-inset-top,0px)+12px)] z-30 -mx-5 -mb-6 px-5 desk:hidden">
+        <ul ref={chipsRef} className="flex gap-1 overflow-x-auto rounded-full border border-line-strong bg-[color-mix(in_srgb,var(--surface)_88%,transparent)] p-1 shadow-float backdrop-blur-lg [scrollbar-width:none]">
+          {layers.map((layer, i) => (
+            <li key={layer.id} className="shrink-0">
+              <button
+                type="button"
+                data-chip={i}
+                onClick={() => jumpTo(i)}
+                aria-current={active === i ? 'true' : undefined}
+                className={`h-9 whitespace-nowrap rounded-full px-4 text-[13px] font-medium transition-colors ${active === i ? 'bg-ink text-paper' : 'text-ink-2'}`}
+              >
+                {layer.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       <div className="grid gap-[clamp(48px,8vw,96px)]">
         {layers.map((layer, i) => (

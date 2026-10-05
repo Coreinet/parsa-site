@@ -10,7 +10,7 @@ export interface IndexEntry {
   node: ReactNode;
 }
 
-/** Blog archive on the home page: category chips + instant search, grouped under year headings. */
+/** Blog archive on /blog: category chips + instant search, grouped under year headings. */
 export default function BlogIndex({ entries, categories }: { entries: IndexEntry[]; categories: { value: string; label: string; count: number }[] }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');

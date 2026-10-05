@@ -65,7 +65,7 @@ export default async function TopicPage(props: PageProps<'/topics/[id]'>) {
             </li>
             <li aria-hidden="true">/</li>
             <li>
-              <Link href="/#blog" className="hover:text-ink">
+              <Link href="/blog" className="hover:text-ink">
                 Blog
               </Link>
             </li>

@@ -1,20 +1,24 @@
 /**
- * Single-page site: every nav item is a section on the home page.
- * Case studies (/work/[slug]) and articles (/blog/[slug]) are the only other pages.
+ * Multi-page site: every nav item is its own URL with its own title, description and
+ * structured data. The home page keeps a short preview of each section that links to it.
  */
-export const SECTIONS = [
-  { id: 'home', label: 'Home' },
-  { id: 'work', label: 'Work' },
-  { id: 'about', label: 'About' },
-  { id: 'stack', label: 'Stack' },
-  { id: 'blog', label: 'Blog' },
-  { id: 'contact', label: 'Contact' }
+export const PAGES = [
+  { id: 'home', label: 'Home', href: '/' },
+  { id: 'work', label: 'Work', href: '/work' },
+  { id: 'about', label: 'About', href: '/about' },
+  { id: 'stack', label: 'Stack', href: '/stack' },
+  { id: 'blog', label: 'Blog', href: '/blog' },
+  { id: 'contact', label: 'Contact', href: '/contact' }
 ] as const;
 
-export type SectionId = (typeof SECTIONS)[number]['id'];
+export type PageId = (typeof PAGES)[number]['id'];
 
-export const sectionHref = (id: SectionId): string => (id === 'home' ? '/#home' : `/#${id}`);
+export const pageHref = (id: PageId): string => PAGES.find(p => p.id === id)?.href ?? '/';
 
-/** On a detail page, which section does it belong to? */
-export const sectionForPath = (pathname: string): SectionId | null =>
-  pathname.startsWith('/work/') ? 'work' : pathname.startsWith('/blog/') ? 'blog' : null;
+/** Which nav item a path belongs to. Topic guides live under the blog. */
+export const pageForPath = (pathname: string): PageId | null => {
+  if (pathname === '/') return 'home';
+  if (pathname.startsWith('/topics/')) return 'blog';
+  const hit = PAGES.find(p => p.href !== '/' && (pathname === p.href || pathname.startsWith(`${p.href}/`)));
+  return hit?.id ?? null;
+};

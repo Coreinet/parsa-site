@@ -66,8 +66,8 @@ export default function AboutPage() {
             <p>I speak Persian, English and Turkish.</p>
           </div>
           <div className="flex flex-wrap gap-3 pt-2">
-            <ButtonLink href="/#contact" label="Get in touch" />
-            <ButtonLink href="/#work" intent="secondary" label="See my work" />
+            <ButtonLink href="/contact" label="Get in touch" />
+            <ButtonLink href="/work" intent="secondary" label="See my work" />
           </div>
         </div>
         <PortraitCard
@@ -177,7 +177,7 @@ export default function AboutPage() {
             ))}
           </dl>
           <p className="text-ink-2">
-            Which projects use each tool is shown in the <Link href="/#stack" className="font-semibold text-ink underline underline-offset-4 hover:text-signal">stack section</Link> of the home page.
+            Which projects use each tool is shown on the <Link href="/stack" className="font-semibold text-ink underline underline-offset-4 hover:text-signal">stack page</Link>.
           </p>
         </section>
 

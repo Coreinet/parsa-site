@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useEffect, useState, type ReactNode, type CSSProperties } from 'react';
 import PillNav from '@/components/layout/PillNav';
 import Monogram from '@/components/ui/Monogram';
-import { scrollToSection } from '@/components/layout/scrollToSection';
 
 /**
  * Floating header. Desktop (lg + fine pointer): monogram · PillNav · actions, hides on scroll down,
@@ -44,8 +43,7 @@ export default function SiteHeader({ actions }: { actions?: ReactNode }) {
       }`}
     >
       <Link
-        href="/#home"
-        onClick={e => scrollToSection(e, 'home')}
+        href="/"
         aria-label="Parsa Alizadeh, home"
         style={{ '--fx-fill': 'var(--ink)' } as CSSProperties}
         className="fx-fill group grid size-11 place-items-center rounded-full border border-line-strong bg-surface/85 text-ink backdrop-blur-md transition-colors duration-300 hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"

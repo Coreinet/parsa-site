@@ -40,11 +40,11 @@ export default function NotFound() {
           ) : null}
         </p>
         <h2 className="text-h1 font-semibold">This page doesn&apos;t exist.</h2>
-        <p className="max-w-[60ch] text-body-lg text-ink-2">The link may be old, or have a typo. Everything else lives on the home page:</p>
-        <nav aria-label="Suggested sections" className="flex flex-wrap gap-3 pt-2">
-          <ButtonLink href="/#home" label="Go home" />
-          <ButtonLink href="/#work" intent="secondary" label="See work" />
-          <ButtonLink href="/#blog" intent="secondary" label="Read the blog" />
+        <p className="max-w-[60ch] text-body-lg text-ink-2">The link may be old, or have a typo. Try one of these instead:</p>
+        <nav aria-label="Suggested pages" className="flex flex-wrap gap-3 pt-2">
+          <ButtonLink href="/" label="Go home" />
+          <ButtonLink href="/work" intent="secondary" label="See work" />
+          <ButtonLink href="/blog" intent="secondary" label="Read the blog" />
         </nav>
       </div>
     </div>

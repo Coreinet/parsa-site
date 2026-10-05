@@ -53,6 +53,7 @@ export default async function ArticlePage(props: PageProps<'/blog/[slug]'>) {
           articleSchema(article),
           breadcrumbSchema([
             { name: 'Home', path: '/' },
+            { name: 'Blog', path: '/blog' },
             { name: article.title, path: `/blog/${article.slug}` }
           ])
         )}
@@ -61,10 +62,10 @@ export default async function ArticlePage(props: PageProps<'/blog/[slug]'>) {
       <article>
         <Container as="header" className="grid max-w-[920px] gap-5 pb-10 pt-[clamp(32px,6vw,72px)]">
           <div className="flex flex-wrap items-center gap-2">
-            <Link href="/#blog" className="mr-2 font-mono text-xs text-ink-3 hover:text-ink">
+            <Link href="/blog" className="mr-2 font-mono text-xs text-ink-3 hover:text-ink">
               ← Blog
             </Link>
-            <Link href="/#blog">
+            <Link href="/blog">
               <Tag category>{CATEGORIES[article.category]}</Tag>
             </Link>
             {article.example ? <ExampleBadge /> : null}
@@ -160,7 +161,7 @@ export default async function ArticlePage(props: PageProps<'/blog/[slug]'>) {
                   All articles
                 </Link>
                 <span className="text-ink-3"> · </span>
-                <Link href="/#contact" className="font-semibold text-signal hover:underline">
+                <Link href="/contact" className="font-semibold text-signal hover:underline">
                   Work with me
                 </Link>
               </p>
