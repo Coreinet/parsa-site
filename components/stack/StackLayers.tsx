@@ -53,7 +53,7 @@ export default function StackLayers({ layers }: { layers: StackLayer[] }) {
   };
 
   return (
-    <div className="grid gap-12 desk:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] desk:gap-16">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-12 desk:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] desk:gap-16">
       <div className="hidden desk:block">
         <div className="sticky top-[calc(env(safe-area-inset-top,0px)+96px)] h-[min(60svh,420px)]">
           <OptionWheel
@@ -74,7 +74,7 @@ export default function StackLayers({ layers }: { layers: StackLayer[] }) {
       </div>
 
       {/* Phones and tablets: a sticky chip bar stands in for the wheel and follows the same scrollspy. */}
-      <nav aria-label="Stack layers" className="sticky top-[calc(env(safe-area-inset-top,0px)+12px)] z-30 -mx-5 -mb-6 px-5 desk:hidden">
+      <nav aria-label="Stack layers" className="sticky top-[calc(env(safe-area-inset-top,0px)+12px)] z-30 -mb-6 min-w-0 desk:hidden">
         <ul ref={chipsRef} className="flex gap-1 overflow-x-auto rounded-full border border-line-strong bg-[color-mix(in_srgb,var(--surface)_88%,transparent)] p-1 shadow-float backdrop-blur-lg [scrollbar-width:none]">
           {layers.map((layer, i) => (
             <li key={layer.id} className="shrink-0">
