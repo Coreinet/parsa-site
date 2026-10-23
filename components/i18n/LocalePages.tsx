@@ -15,26 +15,24 @@ import { getArticles, getProjects } from '@/lib/content';
 import { breadcrumbSchema, graph, personSchema, translatedPageSchema } from '@/lib/schema';
 
 /**
- * The Persian and Turkish sites: home, about, work and contact, written from the same
- * confirmed facts as the English pages. Projects link to their English case studies and the
- * writing links to the English blog; English titles are marked lang="en" for screen readers.
+ * Home, about, work and contact of the Persian and Turkish sites, written from the same
+ * confirmed facts as the English pages. Projects and articles are their translated copies.
  */
 
 const divider = <div className="border-t border-line" />;
 
 function Projects({ locale, home = false }: { locale: Translated; home?: boolean }) {
-  const projects = getProjects();
+  const projects = getProjects(locale);
   const featured = projects.find(p => p.featured) ?? projects[0];
   const rest = projects.filter(p => p !== featured);
   const others = home ? rest.slice(0, 4) : rest;
-  const summary = (slug: string): string | undefined => copy[locale].projects[slug];
   return (
     <>
-      {featured ? <ProjectCard project={featured} featured locale={locale} summary={summary(featured.slug)} /> : null}
+      {featured ? <ProjectCard project={featured} featured /> : null}
       <ul className="grid gap-x-8 gap-y-14 md:grid-cols-2">
         {others.map(p => (
           <li key={p.slug}>
-            <ProjectCard project={p} locale={locale} summary={summary(p.slug)} />
+            <ProjectCard project={p} />
           </li>
         ))}
       </ul>
@@ -120,17 +118,13 @@ export function LocaleHome({ locale }: { locale: Translated }) {
 
       <Section
         id="blog"
-        path="/blog"
+        path={localePath(locale, '/blog')}
         title={c.writingTitle}
         intro={c.writingText}
-        action={
-          <TextLink href="/blog" hrefLang="en">
-            {`${c.readBlog} (${c.englishNote})`}
-          </TextLink>
-        }
+        action={<TextLink href={localePath(locale, '/blog')}>{c.readBlog}</TextLink>}
       >
-        <ul lang="en" dir="ltr" className="border-b border-line">
-          {getArticles()
+        <ul className="border-b border-line">
+          {getArticles(locale)
             .slice(0, 3)
             .map(a => (
               <li key={a.slug}>
@@ -246,7 +240,7 @@ export function LocaleWork({ locale }: { locale: Translated }) {
         page={t.nav.work}
         home={{ name: t.nav.home, href: localePath(locale) }}
         title={c.workTitle}
-        intro={`${c.workIntro} ${c.caseStudiesNote}`}
+        intro={c.workIntro}
       >
         <Projects locale={locale} />
       </Section>

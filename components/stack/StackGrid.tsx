@@ -1,14 +1,16 @@
 import Link from 'next/link';
 import type { StackLayerData } from '@/content/stack';
 import { StackIcon } from '@/components/stack/icons';
+import type { Locale } from '@/content/i18n';
+import { pageText } from '@/content/pageText';
 import { getProjects } from '@/lib/content';
 
 /**
  * One layer's tools. Each tool links to the projects that use it, so the stack is evidence
  * ("used in Veyro, Gitech") rather than a self-assessment.
  */
-export default function StackGrid({ layer }: { layer: StackLayerData }) {
-  const projects = new Map(getProjects().map(p => [p.slug, p.title]));
+export default function StackGrid({ layer, locale = 'en' }: { layer: StackLayerData; locale?: Locale }) {
+  const projects = new Map(getProjects(locale).map(p => [p.slug, p]));
 
   return (
     <div className="grid gap-5">
@@ -24,11 +26,11 @@ export default function StackGrid({ layer }: { layer: StackLayerData }) {
                 <span className="text-sm text-ink-2">{item.note}</span>
                 {used.length ? (
                   <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1 pt-1 text-[13px] text-ink-3">
-                    Used in
+                    {pageText[locale].stack.usedIn}
                     {used.map((slug, i) => (
                       <span key={slug}>
-                        <Link href={`/work/${slug}`} className="font-medium text-ink underline decoration-line-strong underline-offset-2 hover:text-signal hover:decoration-signal">
-                          {projects.get(slug)}
+                        <Link href={projects.get(slug)?.href ?? `/work/${slug}`} className="font-medium text-ink underline decoration-line-strong underline-offset-2 hover:text-signal hover:decoration-signal">
+                          {projects.get(slug)?.title}
                         </Link>
                         {i < used.length - 1 ? ',' : ''}
                       </span>

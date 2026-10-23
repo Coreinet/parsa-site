@@ -1,0 +1,87 @@
+---
+title: "İnsanlara saygı duyan hareket: prefers-reduced-motion ve WCAG"
+seoTitle: "prefers-reduced-motion ve WCAG"
+description: "WCAG’nin hareketli içerik ve etkileşimle tetiklenen animasyon hakkında ne söylediği, prefers-reduced-motion medya özelliğinin nasıl çalıştığı ve bu sitenin bu tercihe uymak için kullandığı kalıplar."
+date: 2026-09-19
+category: web
+tags: [accessibility, animation, css, wcag]
+cover: /images/blog/reduced-motion-accessibility.png
+coverAlt: "Hareketli bir öğenin iki kez gösterildiği çizim, biri hareket izleriyle hareket hâlinde, diğeri durağan; yanında prefers-reduced-motion reduce CSS medya sorgusu"
+---
+
+Animasyon bir arayüzün takip edilmesini kolaylaştırabilir. Ancak bazı insanları rahatsız da edebilir. Bu yazıda standartların web’deki hareket hakkında gerçekte ne söylediğini ve her animasyonun sakin bir alternatifi olsun diye bu sitede kullandığım küçük kalıp setini bir araya getiriyorum.
+
+## Hareket kimleri etkiler
+
+WCAG’nin etkileşimlerden kaynaklanan animasyonlara ilişkin rehberi, denge ve uzamsal yönelimi etkileyen iç kulak rahatsızlıkları olan vestibüler bozukluklara sahip kişilere odaklanır. W3C, tetiklenen tepkilerin mide bulantısı, migren baş ağrıları ve hatta toparlanmak için yatak istirahati gerektirmeyi içerebileceğini belirtir [1]. Kendiliğinden başlayan hareketli içerik, dikkat eksikliği ya da okuma güçlüğü yaşayan kişilerin de dikkatini dağıtabilir [2].
+
+## WCAG ne gerektirir
+
+WCAG 2.2’deki iki başarı ölçütü doğrudan hareketle ilgilidir.
+
+**2.2.2 Duraklat, Durdur, Gizle (Pause, Stop, Hide; A Düzeyi).** Otomatik olarak başlayan, beş saniyeden uzun süren ve diğer içerikle eş zamanlı gösterilen hareketli, yanıp sönen ya da kayan bilgiler için, hareket temel bir gereklilik değilse, kullanıcının bunu duraklatmasının, durdurmasının ya da gizlemesinin bir yolu olmalıdır [2]. A Düzeyi, uygunluğun temel düzeyidir.
+
+**2.3.3 Etkileşimlerden Kaynaklanan Animasyon (Animation from Interactions; AAA Düzeyi).** Etkileşimle tetiklenen hareket animasyonu, animasyon işlevsellik ya da aktarılan bilgi için temel bir gereklilik değilse, devre dışı bırakılabilir [1]. Bu ölçüt AAA Düzeyindedir, ancak `prefers-reduced-motion` özelliğinin kolaylaştırdığı şeyi birebir tanımlar.
+
+## Medya özelliği
+
+`prefers-reduced-motion`, bir kişinin cihazından temel olmayan hareketi en aza indirmesini isteyip istemediğini algılar. İki değeri vardır: `no-preference` ve `reduce` [3]. Kullanıcılar bu ayarı işletim sistemlerinden açar, örneğin [3]:
+
+- Windows 11: Ayarlar › Erişilebilirlik › Görsel efektler › Animasyon efektleri
+- iOS: Ayarlar › Erişilebilirlik › Hareket
+- Android 9 ve sonrası: Ayarlar › Erişilebilirlik › Animasyonları kaldır
+
+## Bu sitede kullandığım kalıplar
+
+### 1. CSS’te genel bir güvenlik ağı
+
+Tercih ayarlandığında her geçiş ve animasyon fiilen anlık hâle gelir:
+
+```css title="globals.css"
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+```
+
+### 2. Tercihi JavaScript’te de kontrol edin
+
+CSS, `requestAnimationFrame` ile yürütülen bir animasyon döngüsünü durduramaz; bu yüzden betikle oluşturulan efektler aynı tercihi okur ve bu işi atlar:
+
+```ts
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!reduce) startAnimation();
+```
+
+Bu sitede parçacıklardan oluşan “404” doğrudan son hâliyle işlenir, hero bölümündeki 3D kafes durağan bir görselle değiştirilir ve kayan metin şeridi hareket etmez.
+
+### 3. Bitmiş, okunabilir bir durumdan başlayın
+
+Hero bölümündeki animasyonlu isim, sayfadaki gerçek bir metindir. Animasyon, tercih nedeniyle, yavaş bir cihaz yüzünden ya da JavaScript başarısız olduğu için hiç çalışmasa bile isim orada durur ve okunabilir. Animasyon her zaman yalnızca zaten çalışan bir duruma katkı sağlamalıdır.
+
+### 4. Hareketli içeriğe bir duraklatma düğmesi verin
+
+Bir şey kendi kendine beş saniyeden uzun süre hareket ediyorsa 2.2.2 ölçütü geçerlidir; bu yüzden görünür bir duraklatma kontrolüne ihtiyaç duyar [2]. Bu sitenin kod tabanındaki kendiliğinden hareket eden iki bileşenin, yani kayan bir logo şeridinin ve yavaşça süzülen bir proje ekran görüntüsü duvarının her birinde bu kontrol var. Logo şeridi ayrıca üzerine gelindiğinde ya da klavye odağını tuttuğunda yavaşlayarak durur; böylece bir bağlantı asla imlecin altından kayıp gitmez. Duvar ise imlecin altındaki sütunu durdurur.
+
+<Callout type="tip">
+Yalnızca tarayıcı geliştirici araçlarıyla değil, ayar işletim sisteminizde gerçekten açıkken test edin. Unuttuğunuz o tek animasyonu bulmanın en hızlı yolu budur.
+</Callout>
+
+## Özet
+
+- Hareket, bazı insanlarda gerçek fiziksel belirtilere yol açabilir [1].
+- Beş saniyeden uzun süren otomatik hareket bir duraklatma, durdurma ya da gizleme mekanizması gerektirir (WCAG 2.2.2, A Düzeyi) [2].
+- `prefers-reduced-motion` tercihine CSS’te ve JavaScript’te uyun [3].
+- Önce durağan durumu tasarlayın; animasyonu onun üzerine ekleyin.
+
+İlgili yazı: [bu sitede LCP’yi düzeltmek bana ne öğretti](/tr/blog/core-web-vitals-lcp).
+
+## Kaynaklar
+
+1. W3C, “Understanding Success Criterion 2.3.3: Animation from Interactions”, https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html
+2. W3C, “Understanding Success Criterion 2.2.2: Pause, Stop, Hide”, https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html
+3. MDN Web Docs, “prefers-reduced-motion”, https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion

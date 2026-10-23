@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { copy, isTranslated, languageAlternates, LOCALE_META, LOCALES, localePath, splitLocale, type Locale, type Translated, type TranslatedPath } from '@/content/i18n';
+import { copy, languageAlternates, LOCALE_META, LOCALES, localePath, splitLocale, type Locale, type Translated, type TranslatedPath } from '@/content/i18n';
 import { site } from '@/content/site';
 import { SITE_URL } from '@/lib/site-url';
 
@@ -50,26 +50,28 @@ interface PageMeta {
   type?: 'website' | 'profile' | 'article';
   image?: { url: string; width?: number; height?: number; alt: string };
   article?: { publishedTime: string; modifiedTime: string; tags: string[]; section: string };
+  /** Languages this page exists in, for hreflang. Default: all; articles pass the ones translated. */
+  locales?: readonly Locale[];
 }
 
 /**
  * Complete per-page metadata. Next.js replaces (not merges) the parent's openGraph object,
- * so every page gets the full set: canonical, Open Graph and Twitter card. Pages that exist
- * in every language also get hreflang links to each other.
+ * so every page gets the full set: canonical, Open Graph and Twitter card, and hreflang links
+ * to the same page in its other languages.
  */
-export function pageMetadata({ title, description, path, type = 'website', image = DEFAULT_OG_IMAGE, article }: PageMeta): Metadata {
+export function pageMetadata({ title, description, path, type = 'website', image = DEFAULT_OG_IMAGE, article, locales = LOCALES }: PageMeta): Metadata {
   const { locale, path: base } = splitLocale(path);
-  const translated = isTranslated(base);
+  const translated = locales.length > 1;
   return {
     title: { absolute: title },
     description,
-    alternates: { canonical: path, ...(translated ? { languages: languageAlternates(base) } : {}) },
+    alternates: { canonical: path, ...(translated ? { languages: languageAlternates(base, locales) } : {}) },
     openGraph: {
       type,
       url: path,
       siteName: site.name,
       locale: LOCALE_META[locale].og,
-      ...(translated ? { alternateLocale: LOCALES.filter(l => l !== locale).map(l => LOCALE_META[l].og) } : {}),
+      ...(translated ? { alternateLocale: locales.filter(l => l !== locale).map(l => LOCALE_META[l].og) } : {}),
       title,
       description,
       images: [image],

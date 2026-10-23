@@ -1,0 +1,89 @@
+---
+title: "Kişisel bir web sitesi için yapılandırılmış veri: Person, ProfilePage ve sameAs"
+seoTitle: "Kişisel bir web sitesi için yapılandırılmış veri"
+description: "Kendinizi arama motorlarına JSON-LD ile nasıl tanıtacağınız, Google’ın ProfilePage dokümantasyonunun neler istediği ve yapılandırılmış veriyi dürüst tutan kurallar."
+date: 2026-09-19
+category: web
+tags: [seo, structured-data, json-ld, schema-org]
+cover: /images/blog/structured-data-personal-website.png
+coverAlt: "WebSite, ProfilePage ve BlogPosting düğümlerinin tek bir Person düğümünü gösterdiği, bu düğümün de sameAs aracılığıyla GitHub, LinkedIn ve Instagram’a bağlandığı bir JSON-LD grafiğinin diyagramı"
+---
+
+Kişisel bir web sitesinin tek bir ana konusu vardır: kişinin kendisi. Yapılandırılmış veri, bunu arama motorlarına sayfadan çıkarım yapmaya bırakmak yerine onların okuyabileceği bir biçimde açıkça söylemenin bir yoludur. Bu yazı, bu sitenin kullandığı işaretlemeyi ve her tercihin arkasındaki dokümantasyonu adım adım ele alıyor.
+
+## Neden JSON-LD
+
+Google Arama, yapılandırılmış veri için üç biçimi destekler: JSON-LD, Microdata ve RDFa. Google, sitenin yapısı izin verdiği sürece JSON-LD’yi önerir; çünkü büyük ölçekte uygulaması ve bakımı en kolay biçim odur [1]. JSON-LD, okuyucunun gördüğü HTML’den ayrı bir `<script type="application/ld+json">` bloğunda yer alır; bu da işaretlemeyi tasarımın dışında tutar.
+
+## ProfilePage: bir kişi hakkındaki sayfa
+
+Google’ın ProfilePage dokümantasyonu, bu işaretlemeyi içerik üreticilerinin, yani kişilerin ya da kuruluşların, birinci elden bakış açılarını paylaştığı siteler için tasarlanmış olarak tanımlar. Geçerli kullanımlar listesinde bloglardaki “Hakkımda” sayfaları ve yazar sayfaları da yer alır [2].
+
+ProfilePage’in tek bir zorunlu özelliği vardır: `mainEntity`; bu değer bir `Person` ya da bir `Organization` olmalıdır [2]. Bu kişi için önerilen özellikler arasında `name`, `alternateName`, `description`, `identifier`, `image` ve `sameAs` bulunur [2].
+
+Bu sitede ProfilePage, [Hakkımda sayfasıdır](/tr/about) ve ana varlığı benim.
+
+## sameAs: profillerinizi birbirine bağlamak
+
+Schema.org, `sameAs` özelliğini “öğenin kimliğini kesin biçimde gösteren bir referans web sayfasının URL’si” olarak tanımlar; örneğin bir Wikipedia sayfası, bir Wikidata kaydı ya da resmî bir web sitesi [3]. Google ise ProfilePage için bunu “profile ait diğer harici profillerin ya da ana sayfaların URL’si” olarak açıklar [2].
+
+Bir geliştirici için bu genellikle GitHub ve LinkedIn gibi gerçekten kontrol ettiğiniz profiller anlamına gelir. Yalnızca gerçekten size ait olan profilleri listeleyin. `sameAs` özelliğinin amacı kimliktir ve yanlış bir bağlantı bu kimliği zayıflatır.
+
+## Tek bir Person, her yerden referans verilen
+
+Bulduğum en kullanışlı kalıp, kişiyi sabit bir `@id` ile bir kez tanımlamak ve diğer tüm düğümlerin ona işaret etmesini sağlamaktır:
+
+```json title="Bu sitenin JSON-LD’sinden sadeleştirilmiştir"
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://example.com/#person",
+      "name": "Parsa Alizadeh",
+      "jobTitle": "Software Developer",
+      "sameAs": [
+        "https://github.com/Coreinet",
+        "https://www.linkedin.com/in/parsa-alizadeh-123237240/"
+      ]
+    },
+    {
+      "@type": "ProfilePage",
+      "mainEntity": { "@id": "https://example.com/#person" }
+    }
+  ]
+}
+```
+
+WebSite düğümü aynı `@id` değerini yayıncısı olarak gösterir ve her blog yazısı onu yazar olarak belirtir. Sonuç, aynı kişiye ait birbirinden kopuk birkaç tanım yerine tutarlı tek bir varlıktır.
+
+## Onu dürüst tutan kurallar
+
+Google’ın genel yapılandırılmış veri yönergeleri kısa ve katıdır [4]:
+
+- Yapılandırılmış veri, sayfa içeriğinin gerçek bir yansıması olmalıdır.
+- Sayfanın okuyucularına görünmeyen içeriği işaretlemeyin.
+- Onu aldatmak, yanıltmak ya da başka birinin kimliğine bürünmek için kullanmayın.
+
+<Callout type="warning">
+Bu ikinci kural, bu sitede gerçek bir hatayı yakaladı. Person işaretlemesine, adımın sayfanın hiçbir yerinde görünmeyen alternatif yazımlarını eklemiştim. Bunun iki dürüst çözümü var: Onları sayfada göstermek ya da işaretlemeden çıkarmak. Ben çıkardım; böylece işaretleme artık yalnızca bir okuyucunun görebildiğini söylüyor.
+</Callout>
+
+Yapılandırılmış verinin neler yapmadığını bilmek de önemlidir. Google, işaretleme doğru olsa bile arama sonuçlarında görüneceğini garanti etmez [4]. Doğru işaretleme, bir sayfayı zengin sonuçlar için uygun hâle getirir. Bir sıralama anahtarı değildir.
+
+## Kendi siteniz için bir kontrol listesi
+
+- JSON-LD kullanın [1].
+- Sizin hakkınızdaki sayfayı, `mainEntity` değeri bir Person olan bir ProfilePage olarak işaretleyin [2].
+- Person’a sabit bir `@id` verin ve grafiğin geri kalanından ona referans verin.
+- `sameAs` bağlantılarını yalnızca gerçekten size ait olan profillere ekleyin [3].
+- İşaretlemedeki her değerin sayfada göründüğünden emin olun [4].
+
+Aynı sitenin performans tarafı için [LCP’yi düzeltmenin bana öğrettikleri](/tr/blog/core-web-vitals-lcp) yazısına bakın.
+
+## Kaynaklar
+
+1. Google Search Central, “Introduction to structured data markup in Google Search”, https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data
+2. Google Search Central, “Profile page (ProfilePage) structured data”, https://developers.google.com/search/docs/appearance/structured-data/profile-page
+3. Schema.org, “sameAs”, https://schema.org/sameAs
+4. Google Search Central, “General structured data guidelines”, https://developers.google.com/search/docs/appearance/structured-data/sd-policies

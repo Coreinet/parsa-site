@@ -10,8 +10,20 @@ export interface IndexEntry {
   node: ReactNode;
 }
 
+export interface IndexText {
+  all: string;
+  filter: string;
+  search: string;
+  /** "{n} articles shown" */
+  shown: string;
+  shownOne: string;
+  noMatch: string;
+  tryBroader: string;
+  showAll: string;
+}
+
 /** Blog archive on /blog: category chips + instant search, grouped under year headings. */
-export default function BlogIndex({ entries, categories }: { entries: IndexEntry[]; categories: { value: string; label: string; count: number }[] }) {
+export default function BlogIndex({ entries, categories, t }: { entries: IndexEntry[]; categories: { value: string; label: string; count: number }[]; t: IndexText }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
 
@@ -24,12 +36,12 @@ export default function BlogIndex({ entries, categories }: { entries: IndexEntry
   }, [entries, query, category]);
 
   const count = groups.reduce((n, [, list]) => n + list.length, 0);
-  const chips = [{ value: 'all', label: 'All', count: entries.length }, ...categories];
+  const chips = [{ value: 'all', label: t.all, count: entries.length }, ...categories];
 
   return (
     <div className="grid gap-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div role="group" aria-label="Filter by category" className="flex flex-wrap gap-2">
+        <div role="group" aria-label={t.filter} className="flex flex-wrap gap-2">
           {chips.map(c => (
             <button
               key={c.value}
@@ -40,15 +52,15 @@ export default function BlogIndex({ entries, categories }: { entries: IndexEntry
                 category === c.value ? 'border-ink bg-ink text-paper' : 'border-line-strong text-ink-2 hover:border-ink hover:text-ink'
               }`}
             >
-              {c.label} <span className="ml-0.5 text-xs opacity-60">{c.count}</span>
+              {c.label} <span className="ms-0.5 text-xs opacity-60">{c.count}</span>
             </button>
           ))}
         </div>
         <div className="relative w-full max-w-xs">
           <label htmlFor="blog-search" className="sr-only">
-            Search articles
+            {t.search}
           </label>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-3">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-ink-3">
             <circle cx="11" cy="11" r="6" />
             <path d="M20 20l-4.5-4.5" />
           </svg>
@@ -57,20 +69,23 @@ export default function BlogIndex({ entries, categories }: { entries: IndexEntry
             type="search"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search articles"
-            className="h-11 w-full rounded-full border border-line-strong bg-surface pl-11 pr-4 text-base text-ink transition-[border-color,box-shadow] placeholder:text-ink-3 focus:border-signal focus:shadow-[0_0_0_3px_var(--signal-soft)] focus:outline-none"
+            placeholder={t.search}
+            className="h-11 w-full rounded-full border border-line-strong bg-surface ps-11 pe-4 text-base text-ink transition-[border-color,box-shadow] placeholder:text-ink-3 focus:border-signal focus:shadow-[0_0_0_3px_var(--signal-soft)] focus:outline-none"
           />
         </div>
       </div>
 
       <p className="sr-only" aria-live="polite">
-        {count} {count === 1 ? 'article' : 'articles'} shown
+        {(count === 1 ? t.shownOne : t.shown).replace('{n}', String(count))}
       </p>
 
       {groups.length === 0 ? (
         <div className="grid justify-items-start gap-3 rounded-lg border border-dashed border-line-strong p-6">
-          <p className="font-semibold">No articles match{query ? ` “${query}”` : ''}</p>
-          <p className="text-sm text-ink-2">Try a broader word or another category.</p>
+          <p className="font-semibold">
+            {t.noMatch}
+            {query ? ` “${query}”` : ''}
+          </p>
+          <p className="text-sm text-ink-2">{t.tryBroader}</p>
           <button
             type="button"
             onClick={() => {
@@ -79,7 +94,7 @@ export default function BlogIndex({ entries, categories }: { entries: IndexEntry
             }}
             className="h-10 rounded-full border border-line-strong px-4 text-sm font-semibold hover:border-ink"
           >
-            Show all articles
+            {t.showAll}
           </button>
         </div>
       ) : (

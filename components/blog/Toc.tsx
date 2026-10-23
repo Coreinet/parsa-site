@@ -9,7 +9,7 @@ interface Heading {
 }
 
 /** "On this page": highlights the section being read. Sticky in the margin on desktop. */
-export default function Toc({ headings }: { headings: Heading[] }) {
+export default function Toc({ headings, label = 'On this page' }: { headings: Heading[]; label?: string }) {
   const [active, setActive] = useState(headings[0]?.id ?? '');
 
   useEffect(() => {
@@ -28,15 +28,15 @@ export default function Toc({ headings }: { headings: Heading[] }) {
   if (headings.length < 2) return null;
 
   return (
-    <nav aria-label="On this page" className="grid gap-3">
-      <span className="font-mono text-[11px] uppercase tracking-[.08em] text-ink-3">On this page</span>
-      <ul className="grid gap-1.5 border-l border-line text-sm">
+    <nav aria-label={label} className="grid gap-3">
+      <span className="font-mono text-[11px] uppercase tracking-[.08em] text-ink-3">{label}</span>
+      <ul className="grid gap-1.5 border-s border-line text-sm">
         {headings.map(h => (
           <li key={h.id}>
             <a
               href={`#${h.id}`}
               aria-current={active === h.id ? 'location' : undefined}
-              className={`-ml-px block border-l py-0.5 transition-colors ${h.depth === 3 ? 'pl-6' : 'pl-3'} ${
+              className={`-ms-px block border-s py-0.5 transition-colors ${h.depth === 3 ? 'ps-6' : 'ps-3'} ${
                 active === h.id ? 'border-signal text-ink' : 'border-transparent text-ink-3 hover:text-ink'
               }`}
             >

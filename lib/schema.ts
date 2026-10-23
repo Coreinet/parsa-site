@@ -1,7 +1,7 @@
-import { copy, localePath, type Translated, type TranslatedPath } from '@/content/i18n';
+import { copy, localePath, splitLocale, type Locale, type Translated, type TranslatedPath } from '@/content/i18n';
 import { site } from '@/content/site';
 import type { Topic } from '@/content/topics';
-import { topicsForArticle } from '@/content/topics';
+import { localizeTopic, topicsForArticle } from '@/content/topics';
 import type { Article, Project } from '@/lib/content';
 import { absoluteUrl, SITE_URL } from '@/lib/site-url';
 
@@ -119,7 +119,7 @@ export function breadcrumbSchema(items: { name: string; path: string }[]): Json 
 }
 
 export function articleSchema(article: Article): Json {
-  const url = absoluteUrl(`/blog/${article.slug}`);
+  const url = absoluteUrl(article.href);
   return {
     '@type': 'BlogPosting',
     '@id': `${url}#article`,
@@ -133,11 +133,14 @@ export function articleSchema(article: Article): Json {
     author: authorRef(),
     publisher: { '@id': PERSON_ID },
     isPartOf: [{ '@id': BLOG_ID }, { '@id': WEBSITE_ID }],
-    about: topicsForArticle(article.slug).map(t => ({ '@type': 'Thing', name: t.name, url: absoluteUrl(`/topics/${t.id}`) })),
+    about: topicsForArticle(article.slug)
+      .map(t => localizeTopic(t, article.locale))
+      .map(t => ({ '@type': 'Thing', name: t.name, url: absoluteUrl(localePath(article.locale, `/topics/${t.id}`)) })),
     articleSection: article.category,
     keywords: article.tags.join(', '),
     wordCount: article.body.split(/\s+/).filter(Boolean).length,
-    inLanguage: 'en'
+    inLanguage: article.locale,
+    ...(article.locale === 'en' ? {} : { translationOfWork: { '@id': `${absoluteUrl(`/blog/${article.slug}`)}#article` } })
   };
 }
 
@@ -146,7 +149,7 @@ export function articleSchema(article: Article): Json {
  * deployment is described as the WebApplication it produces. Others are CreativeWork.
  */
 export function projectSchema(project: Project): Json {
-  const url = absoluteUrl(`/work/${project.slug}`);
+  const url = absoluteUrl(project.href);
   const base = {
     '@id': `${url}#work`,
     name: project.title,
@@ -156,7 +159,9 @@ export function projectSchema(project: Project): Json {
     dateCreated: String(project.year),
     author: { '@id': PERSON_ID },
     creator: { '@id': PERSON_ID },
-    keywords: project.stack.join(', ')
+    keywords: project.stack.join(', '),
+    inLanguage: project.locale,
+    ...(project.locale === 'en' ? {} : { translationOfWork: { '@id': `${absoluteUrl(`/work/${project.slug}`)}#work` } })
   };
   if (project.links.repo) {
     return {
@@ -172,12 +177,9 @@ export function projectSchema(project: Project): Json {
   return { '@type': 'CreativeWork', ...base, ...(project.links.live ? { sameAs: project.links.live } : {}) };
 }
 
-export function topicSchema(topic: Topic, articles: Article[], projects: Project[]): Json {
-  const url = absoluteUrl(`/topics/${topic.id}`);
-  const parts = [
-    ...articles.map(a => ({ url: absoluteUrl(`/blog/${a.slug}`), name: a.title })),
-    ...projects.map(p => ({ url: absoluteUrl(`/work/${p.slug}`), name: p.title }))
-  ];
+export function topicSchema(topic: Topic, articles: Article[], projects: Project[], locale: Locale = 'en'): Json {
+  const url = absoluteUrl(localePath(locale, `/topics/${topic.id}`));
+  const parts = [...articles.map(a => ({ url: absoluteUrl(a.href), name: a.title })), ...projects.map(p => ({ url: absoluteUrl(p.href), name: p.title }))];
   return {
     '@type': 'CollectionPage',
     '@id': `${url}#page`,
@@ -191,7 +193,7 @@ export function topicSchema(topic: Topic, articles: Article[], projects: Project
       '@type': 'ItemList',
       itemListElement: parts.map((p, i) => ({ '@type': 'ListItem', position: i + 1, url: p.url, name: p.name }))
     },
-    inLanguage: 'en'
+    inLanguage: locale
   };
 }
 
@@ -215,7 +217,7 @@ export function collectionPageSchema(path: string, name: string, description: st
           }
         }
       : {}),
-    inLanguage: 'en'
+    inLanguage: splitLocale(path).locale
   };
 }
 

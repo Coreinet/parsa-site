@@ -1,4 +1,4 @@
-import { isTranslated, localePath, splitLocale, ui, type Locale } from '@/content/i18n';
+import { localePath, splitLocale, ui, type Locale } from '@/content/i18n';
 
 /**
  * Multi-page site: every nav item is its own URL with its own title, description and
@@ -15,15 +15,12 @@ export const PAGES = [
 
 export type PageId = (typeof PAGES)[number]['id'];
 
-/** A page's URL in a language; pages that are not translated link to the English page. */
-export const pageHref = (id: PageId, locale: Locale = 'en'): string => {
-  const href = PAGES.find(p => p.id === id)?.href ?? '/';
-  return isTranslated(href) ? localePath(locale, href) : href;
-};
+/** A page's URL in a language. */
+export const pageHref = (id: PageId, locale: Locale = 'en'): string => localePath(locale, PAGES.find(p => p.id === id)?.href ?? '/');
 
-/** The nav in a language. Translated sites leave out Stack, which has no translation. */
+/** The nav in a language. */
 export const pagesFor = (locale: Locale): { id: PageId; label: string; href: string }[] =>
-  PAGES.filter(p => locale === 'en' || p.id !== 'stack').map(p => ({ id: p.id, label: ui[locale].nav[p.id], href: pageHref(p.id, locale) }));
+  PAGES.map(p => ({ id: p.id, label: ui[locale].nav[p.id], href: pageHref(p.id, locale) }));
 
 /** Which nav item a path belongs to. Topic guides live under the blog. */
 export const pageForPath = (pathname: string): PageId | null => {

@@ -2,41 +2,49 @@ import { ArticleRow } from '@/components/blog/ArticleRow';
 import BlogIndex from '@/components/blog/BlogIndex';
 import { Section, TextLink } from '@/components/ui/primitives';
 import Link from 'next/link';
-import { site } from '@/content/site';
-import { topics } from '@/content/topics';
+import { localePath, ui, type Locale } from '@/content/i18n';
+import { pageText } from '@/content/pageText';
+import { localizeTopic, topics } from '@/content/topics';
 import { CATEGORIES, getArticles } from '@/lib/content';
 
 const HOME_LIMIT = 3;
 
 /** Home: the latest articles, linking to /blog. Page: topic guides plus the searchable archive. */
-export default function BlogSection({ page = false }: { page?: boolean }) {
-  const articles = getArticles();
-  const categories = Object.entries(CATEGORIES)
-    .map(([value, label]) => ({ value, label, count: articles.filter(a => a.category === value).length }))
+export default function BlogSection({ page = false, locale = 'en' }: { page?: boolean; locale?: Locale }) {
+  const t = pageText[locale];
+  const path = localePath(locale, '/blog');
+  const articles = getArticles(locale);
+  const categories = (Object.keys(CATEGORIES) as (keyof typeof CATEGORIES)[])
+    .map(value => ({ value, label: t.categories[value], count: articles.filter(a => a.category === value).length }))
     .filter(c => c.count > 0);
 
   return (
     <Section
       id={page ? undefined : 'blog'}
-      path="/blog"
-      page={page ? 'Blog' : undefined}
-      title={page ? `Blog by ${site.name}` : 'Blog'}
-      intro={
-        page
-          ? `Articles by ${site.name} on building for the web, mobile and AI: what worked, what broke, and why. Every article cites its sources.`
-          : 'Notes on building for the web, mobile and AI: what worked, what broke, and why.'
-      }
-      action={page || !articles.length ? undefined : <TextLink href="/blog">All articles</TextLink>}
+      path={path}
+      page={page ? ui[locale].nav.blog : undefined}
+      home={{ name: ui[locale].nav.home, href: localePath(locale) }}
+      title={page ? t.blog.title : t.blog.homeTitle}
+      intro={page ? t.blog.intro : t.blog.homeIntro}
+      action={page || !articles.length ? undefined : <TextLink href={path}>{t.blog.all}</TextLink>}
     >
       {page ? (
-        <nav aria-label="Topic guides" className="grid gap-3">
-          <h2 className="font-mono text-[11px] uppercase tracking-[.08em] text-ink-3">Topic guides</h2>
+        <nav aria-label={t.blog.topicGuides} className="grid gap-3">
+          <h2 className="font-mono text-[11px] uppercase tracking-[.08em] text-ink-3">{t.blog.topicGuides}</h2>
           <ul className="grid gap-3 sm:grid-cols-2">
-            {topics.map(t => (
-              <li key={t.id}>
-                <Link href={`/topics/${t.id}`} className="group grid h-full gap-1 rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-ink">
-                  <span className="font-semibold transition-colors group-hover:text-signal">{t.name} <span aria-hidden="true">→</span></span>
-                  <span className="text-sm text-ink-2">{t.definition}</span>
+            {topics.map(topic => localizeTopic(topic, locale)).map(topic => (
+              <li key={topic.id}>
+                <Link
+                  href={localePath(locale, `/topics/${topic.id}`)}
+                  className="group grid h-full gap-1 rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-ink"
+                >
+                  <span className="font-semibold transition-colors group-hover:text-signal">
+                    {topic.name}{' '}
+                    <span aria-hidden="true" className="inline-block rtl:-scale-x-100">
+                      →
+                    </span>
+                  </span>
+                  <span className="text-sm text-ink-2">{topic.definition}</span>
                 </Link>
               </li>
             ))}
@@ -45,9 +53,10 @@ export default function BlogSection({ page = false }: { page?: boolean }) {
       ) : null}
 
       {!articles.length ? (
-        <p className="text-ink-2">No articles yet. The first one is being written.</p>
+        <p className="text-ink-2">{t.blog.empty}</p>
       ) : page ? (
         <BlogIndex
+          t={t.index}
           categories={categories}
           entries={articles.map(a => ({
             slug: a.slug,

@@ -22,14 +22,11 @@ export function Status({ status, className, locale = 'en' }: { status: Project['
   );
 }
 
-/**
- * One link per card; the mock frame lifts and the arrow moves diagonally on hover. On the
- * translated sites `summary` replaces the English one; the case study it links to is English.
- */
-export function ProjectCard({ project, featured = false, locale = 'en', summary }: { project: Project; featured?: boolean; locale?: Locale; summary?: string }) {
+/** One link per card, in the project's language; the mock frame lifts and the arrow moves diagonally on hover. */
+export function ProjectCard({ project, featured = false }: { project: Project; featured?: boolean }) {
   return (
     <Link
-      href={`/work/${project.slug}`}
+      href={project.href}
       className="group grid content-start gap-4 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
     >
       <div
@@ -49,7 +46,7 @@ export function ProjectCard({ project, featured = false, locale = 'en', summary 
           {project.year} · {project.platform}
         </span>
         <span className="absolute right-3 top-3 rounded-full bg-surface/90 px-3 py-1.5 backdrop-blur">
-          <Status status={project.status} locale={locale} />
+          <Status status={project.status} locale={project.locale} />
         </span>
       </div>
       <div className="grid gap-1.5">
@@ -62,7 +59,7 @@ export function ProjectCard({ project, featured = false, locale = 'en', summary 
             →
           </span>
         </h3>
-        <p className="text-ink-2">{summary ?? project.summary}</p>
+        <p className="text-ink-2">{project.summary}</p>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {project.example ? <ExampleBadge /> : null}

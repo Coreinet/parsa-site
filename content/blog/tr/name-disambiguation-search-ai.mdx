@@ -1,0 +1,78 @@
+---
+title: "Arama motorları ve yapay zekâ asistanları aynı adı taşıyan kişileri neden karıştırır"
+seoTitle: "Yapay zekâ aynı adlı kişileri neden karıştırır"
+description: "Varlık bağlamanın bir adın hangi kişiyi kastettiğine nasıl karar verdiği, araştırmaların dil modellerini neden en çok az tanınan kişilerde zayıf bulduğu ve kendi profillerinizi kolayca ayırt edilebilir kılan şeyler."
+date: 2026-10-23
+category: web
+tags: [seo, geo, entities, ai, research]
+cover: /images/blog/name-disambiguation-search-ai.png
+coverAlt: "Ad belirsizliği giderme diyagramı: Tek bir ad üç aday kişiyi gösteriyor ve profilleri aynı fotoğraf ve açıklamayla birbirine bağlanan aday seçiliyor"
+---
+
+Bir yapay zekâ asistanına kim olduğumu sorduğumda web sitemi buldu, ancak aynı adı taşıyan başka birine ait bir GitHub profiline bağlantı verdi. Bu nadir görülen bir aksaklık değil. Bir adı doğru kişiyle eşleştirmek zor ve iyi incelenmiş bir problemdir; hem arama motorları hem de dil modelleri bu problemi zaten tanınmış kişileri kayıran sinyallerle çözer. Bu yazı, bu eşleştirmenin nasıl işlediğini, araştırmaların nerede başarısız olduğu hakkında ne söylediğini ve bu konuda neler yapabileceğinizi anlatıyor.
+
+## Dizgeler ve şeyler
+
+Ad bir dizgedir (string). Kişi ise bir şeydir (thing). Google, 2012’de Knowledge Graph’ı “things, not strings” (“dizgeler değil, şeyler”) ifadesiyle tanımladı: Amaç, aramanın yalnızca hangi sayfaların bu kelimeleri içerdiğini değil, bir sorgunun gerçek dünyadaki hangi varlığı kastettiğini anlamasıydı [1].
+
+İkisini birbirine bağlayan adıma **varlık bağlama** (entity linking) ya da adlandırılmış varlık belirsizliği giderme (named entity disambiguation) denir. Bir sayfada “Parsa Alizadeh” gibi bir anma geçtiğinde sistem, bunun hangi varlığı kastettiğine, eğer kastediyorsa, karar vermek zorundadır.
+
+## Varlık bağlama nasıl karar verir
+
+Johannes Hoffart ve meslektaşlarının geliştirdiği AIDA sistemi, bu problemin klasik bir tanımıdır [2]. Üç tür kanıtı birleştirir [2]:
+
+- **Önsel olasılık (prior probability):** Bu adın genel olarak her bir adayı ne sıklıkla kastettiği. Ünlü bir adaşın önsel olasılığı yüksektir.
+- **Bağlam benzerliği (context similarity):** Anmanın çevresindeki kelimelerin, her aday hakkında bilinenlerle ne kadar iyi örtüştüğü.
+- **Tutarlılık (coherence):** Adayın aynı sayfadaki diğer varlıklarla uyumlu olup olmadığı. “React” ve “Next.js” yakınında geçen bir anma, bir sporcudan çok bir yazılım geliştiriciye uyar.
+
+Ünlü olmayan herkes için önemli olan kısım önsel olasılıktır. Bağlam zayıf olduğunda sistem popülerliğe başvurur ve aynı adı taşıyan daha tanınmış kişi kazanır.
+
+## Dil modelleri az tanınan kişilerde neden zorlanır
+
+Dil modellerinin de benzer bir sorunu var ve bu sorun birçok çalışmada doğrudan ölçüldü.
+
+Nikhil Kandpal ve meslektaşları, bir modelin olgusal bir soruyu yanıtlama becerisinin, o olgu hakkında eğitim verisinde kaç belge bulunduğuyla güçlü biçimde bağlantılı olduğunu buldu [3]. Nadiren geçen olgular, yani uzun kuyruk (long tail), çok daha düşük doğrulukla yanıtlanıyor [3].
+
+Alex Mallen ve meslektaşları, farklı popülerlikteki varlıklarla ilgili sorularla aynı sonuca ulaştı [4]. Modeller popüler varlıklarda iyi, daha az popüler olanlarda kötü performans gösterdi; ilgili belgelerin getirilmesi (retrieval) ise tam da modelin kendi belleğinin en zayıf olduğu yerde en çok yardımcı oldu [4].
+
+Biyografiler doğrudan bir testtir. Sewon Min ve meslektaşlarının geliştirdiği FActScore, üretilen biyografileri tek tek olgulara ayırır ve her birini kontrol eder [5]. Onların değerlendirmesinde ChatGPT’nin biyografilerinin olgusal kesinliği yaklaşık %58’di ve daha nadir kişilerde hata oranları daha yüksekti [5].
+
+Dolayısıyla çevrim içi izi küçük olan bir kişi için asistanın güvenilir belleği azdır ve getirdiği sonuçlara bağımlıdır. Adınızla yapılan bir arama bir adaşınızın GitHub profilini döndürürse, asistan bu profili size atfedebilir.
+
+<Callout type="note">
+Araştırma hataların neden oluştuğunu açıklar; bir sonucu garanti eden bir reçete vermez. Hiçbir işaretleme ya da profil ayarı, bir arama motorunu veya asistanı tek bir kişiyi seçmeye zorlayamaz. Yapabileceğiniz şey, doğru yanıtın doğrulanmasını kolaylaştırmaktır.
+</Callout>
+
+## Kendinizi kolayca ayırt edilebilir kılmak
+
+Aşağıdaki her adım, sizin kontrol ettiğiniz iki sinyalden birini, bağlam benzerliğini ya da tutarlılığı artırır.
+
+**Her yerde tek bir ad biçimi kullanın.** Web sitenizde, GitHub’da, LinkedIn’de ve diğer profillerinizde aynı yazım. Adınızı Farsça gibi başka bir alfabeyle de yazıyorsanız, iki biçimi birbirine bağlı olacak şekilde birlikte yayımlayın.
+
+**Her yerde aynı fotoğrafı kullanın.** Siteler arasında tutarlı bir profil fotoğrafı, hem insanlar hem de görselleri karşılaştıran sistemler için kolay bir eşleşme sinyalidir. Her sitede bir logo ya da farklı bir fotoğraf kullanmak bu bağlantıyı koparır.
+
+**İki yönlü bağlantı verin.** Web siteniz her profile bağlantı vermeli, her profil de web sitenize geri bağlantı vermelidir. Tek yönlü bir bağlantı bir iddiadır; geri bağlantı ise bir onaydır.
+
+**Bunu yapılandırılmış veriyle söyleyin.** schema.org’un `sameAs` özelliği, öğenin kimliğini kesin biçimde gösteren bir sayfanın URL’si olarak tanımlanır [6]. Bir Person varlığında profillerinizi `sameAs` içinde listelemek, arama motorlarına bu sayfaların aynı kişiye ait olduğunu söyler. Google, tek bir kişi hakkındaki sayfalar için ProfilePage işaretlemesini belgelemektedir [7]. Ayrıntılı bir anlatımı [kişisel bir web sitesi için yapılandırılmış veri](/tr/blog/structured-data-personal-website) yazısında bulabilirsiniz.
+
+**Ayırt edici bağlam ekleyin.** Adınızın yanında rolünüz, alanınız ve konumunuz, her profilde aynı kelimelerle. “Parsa Alizadeh, yazılım geliştirici, web, mobil ve yapay zekâ” ifadesi, bir sisteme adaşınızın paylaşmadığı, eşleştirilebilecek bir şey verir.
+
+**Yalnızca sizin yayımlayacağınız şeyleri yayımlayın.** Adınızla yayımlanan makaleler ve projeler, sizi alanınızla birlikte anan belgeler ekler. Yukarıdaki araştırmaların az tanınan kişiler için eksik bulduğu kanıt tam olarak budur [3] [4].
+
+Tüm bunların tek bir sitede nasıl bir araya geldiğini görmek için [arama motorlarının anlayabildiği bir site kurmak](/tr/blog/building-a-site-search-engines-understand) yazısına, yapay zekâ yanıt motorlarının kaynakları nasıl seçtiği için de [üretken motor optimizasyonu üzerine araştırma](/tr/blog/generative-engine-optimization-research) yazısına bakın.
+
+## Özet
+
+- Varlık bağlama, bir kişiyi popülerlik, bağlam ve tutarlılık kullanarak seçer [2]; bağlam zayıf olduğunda ünlü adaş kazanır.
+- Dil modelleri nadiren anılan kişiler hakkında en az doğru olanlardır [3] [4] [5]; bu yüzden bilgi getirmeye (retrieval) dayanırlar ve bu da bir adaşı öne çıkarabilir.
+- Bağlamı ve tutarlılığı siz kontrol edersiniz: tek ad, tek fotoğraf, iki yönlü bağlantılar, `sameAs` [6], tutarlı açıklamalar ve kendi yayımladığınız çalışmalar.
+
+## Kaynaklar
+
+1. Singhal, A. “Introducing the Knowledge Graph: things, not strings.” Google, 2012. https://blog.google/products/search/introducing-knowledge-graph-things-not/
+2. Hoffart, J., Yosef, M. A., Bordino, I., Fürstenau, H., Pinkal, M., Spaniol, M., Taneva, B., Thater, S., Weikum, G. “Robust Disambiguation of Named Entities in Text.” EMNLP 2011. https://aclanthology.org/D11-1072/
+3. Kandpal, N., Deng, H., Roberts, A., Wallace, E., Raffel, C. “Large Language Models Struggle to Learn Long-Tail Knowledge.” ICML 2023. https://arxiv.org/abs/2211.08411
+4. Mallen, A., Asai, A., Zhong, V., Das, R., Khashabi, D., Hajishirzi, H. “When Not to Trust Language Models: Investigating Effectiveness of Parametric and Non-Parametric Memories.” ACL 2023. https://arxiv.org/abs/2212.10511
+5. Min, S., Krishna, K., Lyu, X., Lewis, M., Yih, W., Koh, P. W., Iyyer, M., Zettlemoyer, L., Hajishirzi, H. “FActScore: Fine-grained Atomic Evaluation of Factual Precision in Long Form Text Generation.” EMNLP 2023. https://arxiv.org/abs/2305.14251
+6. Schema.org. “sameAs.” https://schema.org/sameAs
+7. Google Search Central. “Profile page (ProfilePage) structured data.” https://developers.google.com/search/docs/appearance/structured-data/profile-page

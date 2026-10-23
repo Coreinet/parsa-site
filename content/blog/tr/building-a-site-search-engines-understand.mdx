@@ -1,0 +1,57 @@
+---
+title: "Arama motorlarının ve yapay zekânın anlayabildiği kişisel bir web sitesi kurmak"
+seoTitle: "Arama motorlarının ve yapay zekânın anlayabildiği bir site"
+description: "Bu sitenin kimin hakkında olduğunu nasıl belirttiğine, makaleleri ve projeleri tek bir kimliğe nasıl bağladığına ve yayımlanmış kılavuzların her bir tercih hakkında ne söylediğine dair birinci elden bir anlatım."
+date: 2026-09-19
+category: web
+tags: [seo, geo, structured-data, personal-website]
+cover: /images/blog/building-a-site-search-engines-understand.png
+coverAlt: "Ana sayfanın, profil sayfasının, makalelerin, projelerin ve konu sayfalarının tek bir kişiyi, Parsa Alizadeh’i gösterdiği; onun da GitHub, LinkedIn ve Instagram’a bağlantı verdiği kişisel bir web sitesinin diyagramı"
+---
+
+Kişisel bir web sitesini okuyan bir arama motoru ya da yapay zekâ yanıt motoru üç soruyu yanıtlamak zorundadır: Bu site kimin hakkında, bu kişi ne üzerinde çalışıyor ve iddialara güvenilebilir mi? Bu makale, bu sitenin bu sorulara nasıl yanıt verdiğini tercih tercih anlatıyor ve her tercihi arkasındaki kılavuza bağlıyor. Aynı zamanda [arama ve yapay zekâ tarafından keşfedilebilirlik](/tr/topics/search-discoverability) konu rehberinin başlangıç noktası.
+
+## 1. Açıkça belirtilmiş tek bir ad
+
+Site tek bir kişi, Parsa Alizadeh hakkında ve her yerde tam olarak bu adı kullanıyor: sayfa başlıklarında, ana sayfanın ana başlığında, profil sayfasında, her makalenin yazar satırında ve yapılandırılmış veride. Farklı yerlerde birkaç farklı yazım kullanmak, bunların aynı kişiyi kastedip kastetmediğini anlamayı zorlaştırır.
+
+Ana sayfanın ana başlığı doğrudan addır. Geliştirme sırasında bir animasyon efekti, bu başlığın sayfayı ayrıştıran her şeye tekrarlanan, birbirine yapışık bir dizge gibi görünmesine yol açtı; bu yüzden başlık, adın yalnızca tek bir kopyasını içerecek şekilde değiştirildi.
+
+## 2. Kişiyi tanımlayan bir profil sayfası
+
+[Hakkımda sayfası](/tr/about) benim hakkımdaki sayfadır. Ne yaptığımı, çalıştığım alanları, kullandığım araçları, konuştuğum dilleri ve diğer profillerimin nerede olduğunu anlatır. Google’ın dokümantasyonu, bloglardaki “Hakkımda” sayfalarını ProfilePage yapılandırılmış verisinin geçerli kullanımları arasında sayar [1]; bu yüzden o sayfa, ana varlığı bir Person olan bir ProfilePage olarak işaretlenmiştir.
+
+## 3. Yapılandırılmış veride tek bir kimlik
+
+Her sayfa aynı Person’ı aynı tanımlayıcıyla tanımlar. Web sitesi bu Person’ı yayıncısı, her makale yazarı, her proje de yaratıcısı olarak gösterir. Person, GitHub, LinkedIn ve Instagram profillerimi `sameAs` içinde listeler; Schema.org bu özelliği, öğenin kimliğini kesin biçimde gösteren bir URL olarak tanımlar [2]. İşaretlemeyi [Kişisel bir web sitesi için yapılandırılmış veri](/tr/blog/structured-data-personal-website) yazısında ayrıntılı olarak açıklıyorum.
+
+Google’ın yönergeleri, yapılandırılmış verinin sayfanın gerçek bir yansıması olmasını ve okuyucuların göremediği içeriği tanımlamamasını şart koşar [3]. Bu yüzden iş unvanından dillere kadar işaretlemedeki her değer, görünür bir sayfada da yazılıdır.
+
+## 4. Kanıtla desteklenen iddialar
+
+Bir beceri listesi yazması kolay, güvenmesi zor bir şeydir. Bu sitede her proje sayfası canlı ürüne bağlantı verir; böylece herkes ürünün var olduğunu kontrol edebilir. [Teknoloji yığını sayfasındaki](/tr/stack) araçlar da onları kullanan projelere bağlantı verir. Herkese açık kaynak kodum, profillerimden biri olarak listelenen GitHub’dadır.
+
+Aynı kural, deneyimden yola çıkarak yazmadığım içerik için de geçerlidir. Siteyi tasarlarken kullanılan yer tutucu metinler canlı derlemeye (production build) dahil edilmez; böylece hiçbir zaman benim hakkımda bir gerçekmiş gibi yayımlanamaz.
+
+## 5. Kaynaklarını gösteren makaleler
+
+Her makale numaralandırılmış kaynaklarla biter ve iddialar metin içinde bu kaynaklara atıf yapar. Bu, okuyucular için iyi bir uygulamadır ve üretken motorlar üzerine yapılan araştırmalarla da örtüşür: Aggarwal ve meslektaşlarının GEO makalesinde atıf, alıntı ve istatistik eklemek, bir kaynağın yapay zekâ tarafından üretilen yanıtlardaki görünürlüğünü artırmanın en etkili yolları arasındayken anahtar kelime doldurma (keyword stuffing) en zayıflar arasındaydı [4]. Bu makaleyi [GEO araştırmasının neyi ölçtüğü](/tr/blog/generative-engine-optimization-research) yazısında özetledim.
+
+## 6. Yalıtılmış yazılar yerine konular
+
+Makaleler konu rehberlerinde gruplanır; her rehberin kısa bir tanımı, başlangıç için bir makalesi, daha derin makaleleri ve ilgili projeleri vardır. Her makale kendi rehberine ve kardeş makalelerine geri bağlantı verir. Bu, konular arasındaki ilişkiyi anahtar kelimelerden çıkarılmaya bırakmak yerine açıkça ortaya koyar.
+
+## 7. Hızlı ve erişilebilir bir sayfa
+
+Bir sayfayı anlamak, onu yüklemekle başlar. Site statik HTML olarak üretilir; Largest Contentful Paint değerini [Core Web Vitals ve LCP’yi düzeltmek](/tr/blog/core-web-vitals-lcp) yazısında anlattığım şekilde ölçüp iyileştirdim.
+
+## Bunun yapmadıkları
+
+Bunların hiçbiri bir sıralamayı ya da bir atfı garanti etmez. Google, yapılandırılmış verinin doğru olsa bile sonuçlarda görüneceğini garanti etmediğini belirtir [3]; GEO makalesi de yöntemlerinin etkisinin alana göre değiştiğini bildirir [4]. Bu tercihlerin yaptığı şey belirsizliği ortadan kaldırmaktır: Herhangi bir sistemin ve herhangi bir kişinin, sitenin kimin hakkında olduğunu görmesini ve söylediklerini kontrol etmesini kolaylaştırırlar.
+
+## Kaynaklar
+
+1. Google Search Central, “Profile page (ProfilePage) structured data”, https://developers.google.com/search/docs/appearance/structured-data/profile-page
+2. Schema.org, “sameAs”, https://schema.org/sameAs
+3. Google Search Central, “General structured data guidelines”, https://developers.google.com/search/docs/appearance/structured-data/sd-policies
+4. Aggarwal, P., et al. “GEO: Generative Engine Optimization.” KDD 2024. https://arxiv.org/abs/2311.09735

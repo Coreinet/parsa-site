@@ -1,13 +1,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { CATEGORIES, formatDate, type Article } from '@/lib/content';
+import { fill, pageText } from '@/content/pageText';
+import { formatDate, type Article } from '@/lib/content';
 import { ExampleBadge, Tag } from '@/components/ui/primitives';
 
 /** Articles are a dated index, not cards: a journal's table of contents. */
 export function ArticleRow({ article, thumb = false, heading: H = 'h3' }: { article: Article; thumb?: boolean; heading?: 'h3' | 'h4' }) {
+  const t = pageText[article.locale];
   return (
     <Link
-      href={`/blog/${article.slug}`}
+      href={article.href}
       className="group grid grid-cols-[minmax(0,1fr)] gap-3 border-t border-line py-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal sm:grid-cols-[104px_minmax(0,1fr)] sm:gap-4"
     >
       <time dateTime={formatDate(article.date)} className="tabular pt-1 font-mono text-xs text-ink-3">
@@ -16,8 +18,8 @@ export function ArticleRow({ article, thumb = false, heading: H = 'h3' }: { arti
       <div className={thumb ? 'grid gap-4 sm:grid-cols-[minmax(0,1fr)_120px]' : ''}>
         <div className="grid content-start gap-1.5">
           <div className="flex flex-wrap gap-1.5">
-            <Tag category>{CATEGORIES[article.category]}</Tag>
-            <Tag>{article.readingMinutes} min</Tag>
+            <Tag category>{t.categories[article.category]}</Tag>
+            <Tag>{fill(t.article.min, { n: article.readingMinutes })}</Tag>
             {article.example ? <ExampleBadge /> : null}
           </div>
           <H className="text-[19px] font-semibold leading-snug tracking-[-0.01em] transition-colors group-hover:text-signal">{article.title}</H>
@@ -34,9 +36,10 @@ export function ArticleRow({ article, thumb = false, heading: H = 'h3' }: { arti
 }
 
 export function FeaturedArticle({ article }: { article: Article }) {
+  const t = pageText[article.locale];
   return (
     <Link
-      href={`/blog/${article.slug}`}
+      href={article.href}
       className="group grid content-start gap-5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
     >
       <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-line bg-paper-2">
@@ -50,9 +53,9 @@ export function FeaturedArticle({ article }: { article: Article }) {
       </div>
       <div className="grid gap-2">
         <div className="flex flex-wrap items-center gap-1.5">
-          <Tag category>{CATEGORIES[article.category]}</Tag>
+          <Tag category>{t.categories[article.category]}</Tag>
           <span className="tabular font-mono text-xs text-ink-3">
-            {formatDate(article.date)} · {article.readingMinutes} min read
+            {formatDate(article.date)} · {fill(t.article.minRead, { n: article.readingMinutes })}
           </span>
           {article.example ? <ExampleBadge /> : null}
         </div>

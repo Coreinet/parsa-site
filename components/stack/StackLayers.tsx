@@ -15,7 +15,7 @@ export interface StackLayer {
  * being read (scrollspy); turning or clicking it scrolls to that layer.
  * Phones: a sticky chip bar replaces the wheel, and each layer shows its own heading.
  */
-export default function StackLayers({ layers }: { layers: StackLayer[] }) {
+export default function StackLayers({ layers, label = 'Stack layers' }: { layers: StackLayer[]; label?: string }) {
   const [active, setActive] = useState(0);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const jumpingRef = useRef(false);
@@ -58,7 +58,7 @@ export default function StackLayers({ layers }: { layers: StackLayer[] }) {
         <div className="sticky top-[calc(env(safe-area-inset-top,0px)+96px)] h-[min(60svh,420px)]">
           <OptionWheel
             items={layers.map(l => l.name)}
-            label="Stack layers"
+            label={label}
             selected={active}
             onChange={jumpTo}
             fontSize={1.75}
@@ -74,7 +74,7 @@ export default function StackLayers({ layers }: { layers: StackLayer[] }) {
       </div>
 
       {/* Phones and tablets: a sticky chip bar stands in for the wheel and follows the same scrollspy. */}
-      <nav aria-label="Stack layers" className="sticky top-[calc(env(safe-area-inset-top,0px)+12px)] z-30 -mb-6 min-w-0 desk:hidden">
+      <nav aria-label={label} className="sticky top-[calc(env(safe-area-inset-top,0px)+12px)] z-30 -mb-6 min-w-0 desk:hidden">
         <ul ref={chipsRef} className="flex gap-1 overflow-x-auto rounded-full border border-line-strong bg-[color-mix(in_srgb,var(--surface)_88%,transparent)] p-1 shadow-float backdrop-blur-lg [scrollbar-width:none]">
           {layers.map((layer, i) => (
             <li key={layer.id} className="shrink-0">

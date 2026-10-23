@@ -1,7 +1,7 @@
 /**
- * Languages. English is the default and lives at the root; Persian and Turkish have their own
- * URLs (/fa, /tr) so search engines can index each one. Only the pages in TRANSLATED_PATHS
- * exist in every language; case studies and articles stay in English and are linked from there.
+ * Languages. English is the default and lives at the root; Persian and Turkish mirror every
+ * page under their own prefix (/fa, /tr) so search engines can index each one. Articles and
+ * case studies are translated in content/blog/<lang> and content/work/<lang>.
  * Same rule as content/site.ts: only facts Parsa has confirmed, translated, never added to.
  */
 export const LOCALES = ['en', 'fa', 'tr'] as const;
@@ -14,6 +14,7 @@ export const LOCALE_META: Record<Locale, { name: string; short: string; dir: 'lt
   tr: { name: 'Türkçe', short: 'TR', dir: 'ltr', og: 'tr_TR' }
 };
 
+/** The pages whose copy lives in `copy` below; every other page translates its own strings. */
 export const TRANSLATED_PATHS = ['/', '/about', '/work', '/contact'] as const;
 export type TranslatedPath = (typeof TRANSLATED_PATHS)[number];
 
@@ -26,14 +27,10 @@ export function splitLocale(pathname: string): { locale: Locale; path: string } 
   return m ? { locale: m[1] as Locale, path: pathname.slice(m[0].length) || '/' } : { locale: 'en', path: pathname };
 }
 
-export const isTranslated = (path: string): path is TranslatedPath => (TRANSLATED_PATHS as readonly string[]).includes(path);
-
-/** hreflang map for a page that exists in every language; x-default is the English page. */
-export const languageAlternates = (path: TranslatedPath): Record<string, string> => ({
-  en: path,
-  fa: localePath('fa', path),
-  tr: localePath('tr', path),
-  'x-default': path
+/** hreflang map for a page in the given languages (default: all); x-default is the English page. */
+export const languageAlternates = (path: string, locales: readonly Locale[] = LOCALES): Record<string, string> => ({
+  ...Object.fromEntries(locales.map(l => [l, localePath(l, path)])),
+  ...(locales.includes('en') ? { 'x-default': path } : {})
 });
 
 // ---------- Interface strings, for every language ----------
@@ -219,9 +216,6 @@ export interface PageCopy {
   workTitle: string;
   workIntro: string;
   allProjects: string;
-  caseStudiesNote: string;
-  /** Project summaries by slug; a project without one shows its English summary. */
-  projects: Record<string, string>;
   writingTitle: string;
   writingText: string;
   readBlog: string;
@@ -230,7 +224,6 @@ export interface PageCopy {
   contactText: string;
   contactBand: [string, string];
   formTitle: string;
-  englishNote: string;
 }
 
 export const copy: Record<Translated, PageCopy> = {
@@ -284,23 +277,14 @@ export const copy: Record<Translated, PageCopy> = {
     workTitle: 'نمونه‌کارهای پارسا علیزاده',
     workIntro: 'پروژه‌های وب، موبایل و هوش مصنوعی، هرکدام با یک مطالعه‌ی موردی کوتاه: مسئله، رویکرد و نتیجه.',
     allProjects: 'همه‌ی پروژه‌ها',
-    caseStudiesNote: 'متن کامل مطالعه‌های موردی به انگلیسی است.',
-    projects: {
-      enteredge: 'پلتفرم خودکارسازی معاملات رمزارز برای ساخت، بک‌تست و اجرای ربات‌های سیگنال روی صرافی‌های بزرگ.',
-      gamesector: 'پلتفرم جذب و همکاری برای بوسترهای بازی، با موقعیت‌های باز در فهرستی رو به رشد از بازی‌ها.',
-      filmohub: 'سایتی فارسی برای تماشای آنلاین و دانلود فیلم و سریال.',
-      entergame: 'وب‌سایت فارسی یک کلاینت گیمینگ ویندوز که پینگ را کم می‌کند، اتصال را پایدار نگه می‌دارد و محدودیت لانچرهای بازی را دور می‌زند.',
-      safeguard: 'پلتفرم ایمنی و انطباق، با یک سایت معرفی و داشبورد مدیریتی کامل برای پیگیری حوادث، ممیزی‌ها، آموزش‌ها و ریسک.'
-    },
     writingTitle: 'مقاله‌ها',
-    writingText: 'درباره‌ی ساختن برای وب، موبایل و هوش مصنوعی می‌نویسم و هر مقاله منابعش را ذکر می‌کند. مقاله‌ها به زبان انگلیسی هستند.',
+    writingText: 'درباره‌ی ساختن برای وب، موبایل و هوش مصنوعی می‌نویسم و هر مقاله منابعش را ذکر می‌کند.',
     readBlog: 'خواندن بلاگ',
     contactTitle: 'تماس با پارسا علیزاده',
     contactHome: 'بیایید چیزی بسازیم.',
     contactText: 'برای پروژه‌ی وب، موبایل یا هوش مصنوعی با من همکاری کنید، یا فقط سلام کنید. معمولاً ظرف ۲ روز کاری جواب می‌دهم.',
     contactBand: ['چیزی برای ساختن دارید؟', 'بیایید صحبت کنیم.'],
-    formTitle: 'فرم تماس',
-    englishNote: 'به انگلیسی'
+    formTitle: 'فرم تماس'
   },
   tr: {
     name: 'Parsa Alizadeh',
@@ -352,22 +336,13 @@ export const copy: Record<Translated, PageCopy> = {
     workTitle: 'Parsa Alizadeh’in çalışmaları',
     workIntro: 'Web, mobil ve yapay zekâ projeleri; her birinin kısa bir vaka çalışması var: problem, yaklaşım ve sonuç.',
     allProjects: 'Tüm projeler',
-    caseStudiesNote: 'Vaka çalışmalarının tam metni İngilizcedir.',
-    projects: {
-      enteredge: 'Büyük borsalarda sinyal botları oluşturmak, geriye dönük test etmek ve çalıştırmak için bir kripto alım satım otomasyon platformu.',
-      gamesector: 'Oyun booster’ları için, giderek büyüyen bir oyun listesinde açık pozisyonlar sunan bir işe alım ve çalışma platformu.',
-      filmohub: 'Film ve dizi izlemek ve indirmek için Farsça bir site.',
-      entergame: 'Pingi düşüren, bağlantıyı stabil tutan ve oyun başlatıcılarındaki kısıtlamaları aşan bir Windows oyun istemcisinin Farsça web sitesi.',
-      safeguard: 'Olayları, denetimleri, eğitimleri ve riskleri takip etmek için tanıtım sitesi ve tam bir yönetim paneli içeren bir iş güvenliği ve uyum platformu.'
-    },
     writingTitle: 'Yazılar',
-    writingText: 'Web, mobil ve yapay zekâ için geliştirme üzerine yazıyorum; her yazı kaynaklarını belirtir. Yazılar İngilizcedir.',
+    writingText: 'Web, mobil ve yapay zekâ için geliştirme üzerine yazıyorum; her yazı kaynaklarını belirtir.',
     readBlog: 'Blogu oku',
     contactTitle: 'Parsa Alizadeh ile iletişim',
     contactHome: 'Birlikte bir şey yapalım.',
     contactText: 'Web, mobil veya yapay zekâ projeniz için benimle çalışın ya da sadece merhaba deyin. Genellikle 2 iş günü içinde yanıt veririm.',
     contactBand: ['Yapacak bir şeyin mi var?', 'Konuşalım.'],
-    formTitle: 'İletişim formu',
-    englishNote: 'İngilizce'
+    formTitle: 'İletişim formu'
   }
 };

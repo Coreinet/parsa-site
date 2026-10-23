@@ -1,0 +1,72 @@
+---
+title: "React Native’in Yeni Mimarisi: köprünün yerini ne aldı ve bu neden önemli"
+seoTitle: "React Native Yeni Mimarisi açıklaması"
+description: "React Native Yeni Mimarisi’nin neleri değiştirdiği: JSI, Turbo Modules, Fabric işleyicisi ve olay döngüsü; resmî dokümantasyona ve 0.76 sürüm duyurusuna dayanarak."
+date: 2026-09-19
+category: mobile
+tags: [react-native, mobile, architecture, jsi]
+cover: /images/blog/react-native-new-architecture.png
+coverAlt: "React Native için önce ve sonra diyagramı: Solda JavaScript ve yerel kod asenkron bir köprü üzerinden, sağda ise doğrudan JSI üzerinden iletişim kuruyor"
+---
+
+React Native, tarihinin büyük bölümünde JavaScript’i yerel (native) koda köprü (bridge) adı verilen bir bileşen aracılığıyla bağladı. Yeni Mimari (New Architecture) bu bağımlılığı ortadan kaldırıyor. 0.76 sürümünden bu yana her yeni projede varsayılan olduğu için neyin değiştiğini anlamaya değer. Aşağıdaki her şey resmî React Native dokümantasyonundan ve sürüm duyurusundan alınmıştır.
+
+## Zaman çizelgesi
+
+- React Native ekibi, 2018’den bu yana çekirdek iç yapıyı yeniden tasarlıyor [1].
+- **23 Ekim 2024**’te duyurulan React Native **0.76**, Yeni Mimari’yi tüm projelerde varsayılan olarak etkinleştirdi [2].
+
+## Köprü neydi ve yerini ne aldı
+
+Eski mimaride JavaScript ve yerel kod, asenkron bir köprü üzerinden iletişim kuruyordu [1]. Yeni Mimari bu köprüyü kaldırıp yerine **JavaScript Interface (JSI)**’ı koyuyor; JSI, JavaScript’in bir C++ nesnesine referans tutmasına ve bunun tersine olanak tanıyan bir arayüzdür [1].
+
+Sürüm yazısı, köprünün kaldırılmasının iki doğrudan faydasını sıralıyor: JavaScript ile yerel kod arasında doğrudan ve verimli iletişim ile köprünün artık başlatılması gerekmediği için daha hızlı açılış [2]. Köprü kodu, geçiş sürecinde geriye dönük uyumluluk için hâlâ mevcut ve ekip onu gelecekte tamamen kaldırmayı planlıyor [2].
+
+## Yeni Mimari’nin dört parçası
+
+### Turbo Modules: yeni yerel modül sistemi
+
+Yeni Native Module sistemi, JavaScript ile platformun nasıl iletişim kurduğunun tamamen C++ ile yazılmış yeniden yazımıdır [2]. Duyuru şu yetenekleri sıralıyor [2]:
+
+- Yerel çalışma zamanına (runtime) ve oradan senkron erişim
+- JavaScript ile yerel kod arasında tür güvenliği
+- Platformlar arasında kod paylaşımı
+- Varsayılan olarak tembel (lazy) modül yükleme
+
+Tembel yükleme, bir modülün açılışta değil, yalnızca gerçekten ihtiyaç duyulduğunda belleğe yüklenmesi anlamına gelir; bu da uygulama büyüdükçe açılış süresinin düşük kalmasını sağlar [2].
+
+### Codegen: türlendirilmiş bir sözleşme
+
+Codegen ile bir modül, JavaScript katmanı ile yerel katman arasında güçlü biçimde türlendirilmiş bir sözleşme tanımlar [2]. React Native ekibi, sınırlar arası tür hatalarının platformlar arası uygulamalardaki çökmelerin en yaygın kaynaklarından biri olduğunu belirtiyor [2]; üretilen bir sözleşmenin çözdüğü sorun da tam olarak budur.
+
+### Fabric: yeni işleyici
+
+Yerel işleyici (renderer) de yeniden yazıldı. Sürüm yazısına göre [2]:
+
+- Güncellemeler, farklı iş parçacıklarında farklı önceliklerle işlenebilir.
+- Düzen (layout) senkron olarak ve farklı iş parçacıkları arasında okunabilir.
+- İşleyici C++ ile yazılmıştır ve tüm platformlarda ortak kullanılır.
+
+JSI ile birlikte bu, senkron düzeni mümkün kılar: Bir görünümün boyutunu ve konumunu asenkron bir geri çağırma (callback) olmadan okumak [1].
+
+### Tanımlı bir olay döngüsü
+
+Yeni Mimari, HTML Standardı’nda tanımlanan işleme modelini izleyen, iyi tanımlanmış bir olay döngüsü (event loop) uygular [2]. Bu, React Native’e olayları işlemek için işlemeyi kesintiye uğratabilme yeteneği kazandırır ve davranışını web’e yaklaştırır [2]. Ayrıca eş zamanlı işlemeyi (concurrent rendering) ve React 18 ile sonrasında gelen özellikleri destekler [1].
+
+## Mevcut uygulamaları taşımak
+
+Bir uygulama yükseltildiğinde, hâlâ eski mimariyi hedefleyen kütüphaneler için otomatik bir birlikte çalışabilirlik katmanıyla (interop layer) Yeni Mimari üzerinde çalışır [2]. Ekip, çoğu uygulamanın 0.76’ya diğer herhangi bir sürümle aynı çabayla geçmesini bekliyor; bununla birlikte bilinen sınırlamalara da dikkat çekiyor: Birlikte çalışabilirlik katmanı, özel Shadow Node’lara erişimi ya da eş zamanlı özellikleri desteklemiyor [2].
+
+## Özet
+
+- React Native 0.76’dan (Ekim 2024) bu yana Yeni Mimari varsayılandır [2].
+- JSI, asenkron köprünün yerine JavaScript ile C++ arasında doğrudan referanslar getirir [1].
+- Turbo Modules; senkron, türlendirilmiş ve tembel yüklenen yerel modüller sunar [2].
+- Fabric, öncelikli olarak birden çok iş parçacığında işleme yapar ve senkron düzen okumalarına izin verir [2].
+
+Performansın web tarafı için [bu sitede LCP’yi düzeltmek bana ne öğretti](/tr/blog/core-web-vitals-lcp) yazısına bakabilirsiniz.
+
+## Kaynaklar
+
+1. React Native, “About the New Architecture”, https://reactnative.dev/architecture/landing-page
+2. React Native blog, “New Architecture is here” (October 23, 2024), https://reactnative.dev/blog/2024/10/23/the-new-architecture-is-here

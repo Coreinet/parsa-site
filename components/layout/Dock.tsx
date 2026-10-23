@@ -29,8 +29,6 @@ const MORE: PageId[] = ['about', 'stack'];
  */
 export default function Dock({ locale = 'en' }: { locale?: Locale }) {
   const t = ui[locale];
-  // Translated sites have no Stack page.
-  const more = MORE.filter(id => locale === 'en' || id !== 'stack');
   const pathname = usePathname();
   const active = useActivePage();
   const sheetRef = useRef<HTMLDialogElement>(null);
@@ -47,7 +45,7 @@ export default function Dock({ locale = 'en' }: { locale?: Locale }) {
     else sheet.showModal();
   };
 
-  const moreActive = more.some(id => id === active);
+  const moreActive = MORE.some(id => id === active);
 
   return (
     <>
@@ -99,7 +97,7 @@ export default function Dock({ locale = 'en' }: { locale?: Locale }) {
       >
         <div className="mx-auto grid max-w-[520px] gap-1 px-6 pb-[calc(env(safe-area-inset-bottom,0px)+104px)] pt-3">
           <div className="mb-3 h-1 w-9 justify-self-center rounded-full bg-line-strong" aria-hidden="true" />
-          {more.map(id => (
+          {MORE.map(id => (
             <Link
               key={id}
               href={pageHref(id, locale)}

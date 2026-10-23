@@ -1,0 +1,82 @@
+---
+title: "Core Web Vitals neyi ölçer ve kendi sitemde LCP’yi düzeltmek bana ne öğretti"
+seoTitle: "Core Web Vitals ve LCP’yi düzeltmek"
+description: "Üç Core Web Vitals metriği ve eşik değerleri, laboratuvar puanlarının neden asıl değerlendirme olmadığı ve bu web sitesinde yapılmış gerçek bir Largest Contentful Paint incelemesi."
+date: 2026-09-19
+category: web
+tags: [performance, core-web-vitals, lcp, lighthouse]
+cover: /images/blog/core-web-vitals-lcp.png
+coverAlt: "Üç Core Web Vitals metriğini iyi eşik değerleriyle gösteren diyagram: LCP 2,5 saniye, INP 200 milisaniye ve CLS 0,1, 75. yüzdelikte ölçülür"
+---
+
+Core Web Vitals, Google’ın bir sayfanın gerçek kullanıcılara nasıl hissettirdiğini tanımlamak için kullandığı üç metriktir: Ana içeriğin ne kadar hızlı göründüğü, sayfanın ne kadar çabuk tepki verdiği ve düzenin ne kadar kararlı olduğu. Bu yazıda her birinin neyi ölçtüğünü, nasıl değerlendirildiklerini ve bu sitenin ana sayfasını ölçtüğümde neler olduğunu anlatıyorum.
+
+## Üç metrik
+
+web.dev’e göre bir sayfa, şu eşik değerlerini karşıladığında iyi bir deneyim sunar [1]:
+
+| Metrik | Neyi ölçer | İyi |
+| --- | --- | --- |
+| Largest Contentful Paint (LCP) | Görünür en büyük içerik öğesinin ne zaman işlendiğini | 2,5 saniye veya daha az |
+| Interaction to Next Paint (INP) | Sayfanın etkileşimlere ne kadar çabuk tepki verdiğini | 200 milisaniye veya daha az |
+| Cumulative Layout Shift (CLS) | Görünür içeriğin beklenmedik şekilde ne kadar kaydığını | 0,1 veya daha az |
+
+INP, üçünün en yenisidir. 12 Mart 2024’te First Input Delay’in (FID) yerini resmî olarak bir Core Web Vital metriği olarak aldı [2].
+
+## Laboratuvar puanları asıl değerlendirme değildir
+
+Eşik değerleri, mobil ve masaüstü olarak ayrılmış sayfa yüklemelerinin 75. yüzdeliğinde değerlendirilir [1]. Yani esas alınan, bir geliştiricinin makinesindeki tek bir çalıştırma değil, sahada ölçülen gerçek ziyaretlerdir.
+
+Lighthouse gibi araçlar laboratuvar verisi üretir: Sabit koşullar altında simüle edilmiş tek bir yükleme. Laboratuvar verisi nedenleri bulmak için çok faydalıdır, ancak değerlendirmenin dayandığı saha verisinden farklı bir şeydir. Ben Lighthouse’u bir skor tablosu olarak değil, bir mikroskop olarak görüyorum.
+
+## “En büyük içerikli” öğe olarak ne sayılır
+
+LCP; `<img>` öğelerini, `<svg>` içindeki `<image>` öğelerini, `<video>` öğelerini, `url()` ile yüklenen bir CSS arka plan görseline sahip öğeleri ve metin içeren blok düzeyindeki öğeleri dikkate alır [3]. Tarayıcılar ayrıca insanların içerik olarak görmeyeceği şeyleri dışarıda bırakmak için sezgisel kurallar (heuristics) uygular; örneğin opaklığı 0 olan öğeler, tüm görüntü alanını kaplayan öğeler ve düşük entropili yer tutucu görseller [3].
+
+Bunun önemli bir sonucu var: Ekrandaki en büyük şey dekoratif bir görselse, o görsel LCP öğeniz olabilir.
+
+## LCP süresi nereye gidiyor
+
+web.dev, LCP’yi dört alt bölüme ayırır [4]:
+
+1. **Time to First Byte:** Tarayıcının HTML’in ilk baytını alana kadar geçen süre.
+2. **Kaynak yükleme gecikmesi (resource load delay):** O ilk bayt ile tarayıcının LCP kaynağını yüklemeye başlaması arasındaki süre.
+3. **Kaynak yükleme süresi (resource load duration):** LCP kaynağının kendisinin yüklenmesinin ne kadar sürdüğü.
+4. **Öğe işleme gecikmesi (element render delay):** Kaynağın yüklenmesinin bitmesi ile öğenin tamamen işlenmesi arasındaki süre.
+
+Hangi alt bölümün büyük olduğunu bilmek, hangi çözüme başvurmanız gerektiğini söyler. Uzun bir yükleme gecikmesi keşfedilme ve önceliğe işaret eder; uzun bir işleme gecikmesi ise ana iş parçacığını (main thread) engelleyen işlere.
+
+## Gerçek bir inceleme: bu web sitesi
+
+Bu sitenin ana sayfasında Lighthouse’un mobil denetimini ilk çalıştırdığımda LCP **4,6 saniye**, performans puanı ise **70** idi. LCP öğesi ne adım ne de fotoğrafımdı. Hero bölümündeki portrenin arkasında duran dekoratif bir arka plan grafiğiydi: Yaklaşık 1.400 küçük daireden oluşan bir SVG (yaklaşık 105 KB). Üstelik tembel yükleniyordu (lazy-load).
+
+Bu, web.dev’in açıkça belirttiği bir kuralı çiğniyordu: LCP görselini asla tembel yüklemeyin, çünkü bu her zaman yükleme gecikmesi ekler [4].
+
+Sırasıyla değiştirdiklerim:
+
+1. **SVG’yi WebP’ye dönüştürdüm.** Yaklaşık 1.400 vektör dairenin işlenmesi maliyetlidir; aynı grafiğin raster bir görseli yaklaşık 36–39 KB tutuyor. LCP yalnızca biraz değişti, çünkü grafik hâlâ LCP öğesiydi.
+2. **Dekoratif grafiği küçük ekranlarda işlemeyi bıraktım.** Telefonda bu grafik, portrenin arkasında soluk bir dokudan ibaretti. CSS ile gizlenip tembel yüklendiğinde orada hiç indirilmiyor. Bunun yerine LCP öğesi, gerçek içerik olan portre oldu.
+3. **Portreyi önceden yükledim (preload).** LCP görseli için kaynak yükleme gecikmesi 0 ms’ye düştü.
+
+Bu değişikliklerden sonra mobil denetim **82** performans puanı, 520 ms’den **140 ms**’ye düşen Total Blocking Time ve **0** CLS gösterdi. Masaüstü denetimde ise LCP **0,8 saniye**, puan **99** oldu.
+
+<Callout type="note">
+Mobil laboratuvar LCP’si hâlâ yaklaşık 4,6 saniye. Alt bölüm dökümü bunun nedenini gösteriyor: Neredeyse hiç yükleme gecikmesi yok, ancak simüle edilen yavaş telefon JavaScript çalıştırırken yaklaşık 2,7 saniyelik bir işleme gecikmesi var. Yanlış öğeyi düzeltmek, süreyi düzeltmekle aynı şey değil ve bunu görünür kılan da alt bölümler.
+</Callout>
+
+## Kısa bir kontrol listesi
+
+- Önce LCP öğesini bulun. Beklediğiniz şey olmayabilir.
+- Onu asla tembel yüklemeyin [4]. LCP olması muhtemel tek görsel için `fetchpriority="high"` kullanmayı düşünün ve bunu aynı anda birçok kaynakta kullanmayın [4].
+- Dekoratif öğelerin küçük ekranlarda LCP adayı olmasını önleyin.
+- Bir çözüm seçmeden önce alt bölümleri okuyun.
+- Site gerçek ziyaretçiler almaya başladığında saha verisiyle doğrulayın, çünkü eşik değerleri buna göre değerlendirilir [1].
+
+Hareketin ne kadar hızlı işlendiği kadar insanları nasıl etkilediğini de önemsiyorsanız, bu konuyu [İnsanlara saygı duyan hareket](/tr/blog/reduced-motion-accessibility) yazısında ele aldım.
+
+## Kaynaklar
+
+1. web.dev, “Web Vitals”, https://web.dev/articles/vitals
+2. web.dev, “Interaction to Next Paint becomes a Core Web Vital on March 12”, https://web.dev/blog/inp-cwv-march-12
+3. web.dev, “Largest Contentful Paint (LCP)”, https://web.dev/articles/lcp
+4. web.dev, “Optimize Largest Contentful Paint”, https://web.dev/articles/optimize-lcp

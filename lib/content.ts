@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { z } from 'zod';
+import { LOCALES, localePath, type Locale } from '@/content/i18n';
 
 const ROOT = path.join(process.cwd(), 'content');
 
@@ -50,10 +51,13 @@ const articleSchema = z.object({
   example: z.boolean().default(false)
 });
 
-export type Project = z.infer<typeof projectSchema> & { slug: string; body: string };
+/** `locale` is the language of this copy; `href` is its URL in that language. */
+export type Project = z.infer<typeof projectSchema> & { slug: string; body: string; locale: Locale; href: string };
 export type Article = z.infer<typeof articleSchema> & {
   slug: string;
   body: string;
+  locale: Locale;
+  href: string;
   readingMinutes: number;
   headings: { id: string; text: string; depth: 2 | 3 }[];
 };
@@ -114,27 +118,48 @@ const extractHeadings = (body: string): Article['headings'] =>
     .filter((m): m is RegExpExecArray => m !== null)
     .map(m => ({ depth: m[1].length as 2 | 3, text: m[2].trim(), id: slugify(m[2].trim()) }));
 
+/**
+ * Translations live next to the English files, in content/<kind>/fa and content/<kind>/tr,
+ * under the same file name. A copy that has not been translated yet is simply absent.
+ */
+const dirFor = (kind: 'blog' | 'work', locale: Locale): string => (locale === 'en' ? kind : `${kind}/${locale}`);
+
+/** The languages a project or article exists in, English first. */
+export function localesOf(kind: 'blog' | 'work', slug: string): Locale[] {
+  return LOCALES.filter(l => fs.existsSync(path.join(ROOT, dirFor(kind, l), `${slug}.mdx`)));
+}
+
 // ---------- Projects ----------
 
-export function getProjects(): Project[] {
-  return readDir('work')
-    .map(({ slug, data, body }) => ({ ...parse(projectSchema, data, `content/work/${slug}.mdx`), slug, body }))
+export function getProjects(locale: Locale = 'en'): Project[] {
+  const dir = dirFor('work', locale);
+  return readDir(dir)
+    .map(({ slug, data, body }) => ({
+      ...parse(projectSchema, data, `content/${dir}/${slug}.mdx`),
+      slug,
+      body,
+      locale,
+      href: localePath(locale, `/work/${slug}`)
+    }))
     .filter(p => SHOW_EXAMPLES || !p.example)
     .sort((a, b) => a.order - b.order || b.year - a.year);
 }
 
-export function getProject(slug: string): Project | undefined {
-  return getProjects().find(p => p.slug === slug);
+export function getProject(slug: string, locale: Locale = 'en'): Project | undefined {
+  return getProjects(locale).find(p => p.slug === slug);
 }
 
 // ---------- Articles ----------
 
-export function getArticles(): Article[] {
-  return readDir('blog')
+export function getArticles(locale: Locale = 'en'): Article[] {
+  const dir = dirFor('blog', locale);
+  return readDir(dir)
     .map(({ slug, data, body }) => ({
-      ...parse(articleSchema, data, `content/blog/${slug}.mdx`),
+      ...parse(articleSchema, data, `content/${dir}/${slug}.mdx`),
       slug,
       body,
+      locale,
+      href: localePath(locale, `/blog/${slug}`),
       readingMinutes: readingMinutes(body),
       headings: extractHeadings(body)
     }))
@@ -142,13 +167,13 @@ export function getArticles(): Article[] {
     .sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
-export function getArticle(slug: string): Article | undefined {
-  return getArticles().find(a => a.slug === slug);
+export function getArticle(slug: string, locale: Locale = 'en'): Article | undefined {
+  return getArticles(locale).find(a => a.slug === slug);
 }
 
 /** Related by shared tags, then same category, newest first. */
 export function getRelated(article: Article, limit = 3): Article[] {
-  return getArticles()
+  return getArticles(article.locale)
     .filter(a => a.slug !== article.slug)
     .map(a => ({
       a,
