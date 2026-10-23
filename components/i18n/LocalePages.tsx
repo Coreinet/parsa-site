@@ -107,12 +107,46 @@ export function LocaleHome({ locale }: { locale: Translated }) {
       {divider}
 
       <Section id="about" path={localePath(locale, '/about')} title={c.statement} action={<TextLink href={localePath(locale, '/about')}>{c.fullProfile}</TextLink>}>
-        <div className="grid max-w-[60ch] gap-4 text-body-lg text-ink-2">
-          {c.bio.map(p => (
-            <p key={p.slice(0, 24)}>{p}</p>
-          ))}
+        {/* Same layout as the English home (components/sections/AboutSection.tsx). */}
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:gap-16">
+          <div className="grid content-start gap-10">
+            <div className="grid max-w-[60ch] gap-4 text-body-lg text-ink-2">
+              {c.bio.map(p => (
+                <p key={p.slice(0, 24)}>{p}</p>
+              ))}
+            </div>
+            <div className="grid gap-3">
+              <h3 className="font-mono text-[11px] uppercase tracking-[.08em] text-ink-3">{c.interestsTitle}</h3>
+              <ul className="flex flex-wrap gap-2">
+                {c.interests.map(i => (
+                  <li key={i}>
+                    <Tag>{i}</Tag>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Facts locale={locale} />
+            <div className="grid gap-5">
+              <h3 className="text-h2 font-semibold">{c.timelineTitle}</h3>
+              <Changelog entries={c.timeline} />
+            </div>
+          </div>
+          <div>
+            <div className="lg:sticky lg:top-28">
+              <PortraitCard
+                src={site.portrait.src}
+                alt={c.portraitAlt}
+                name={c.name}
+                status={c.availability}
+                available={site.available}
+                contactHref={localePath(locale, '/contact')}
+                contactLabel={ui[locale].nav.contact}
+                caption={c.name}
+                className="mx-auto w-full max-w-[380px]"
+              />
+            </div>
+          </div>
         </div>
-        <Facts locale={locale} />
       </Section>
       {divider}
 
