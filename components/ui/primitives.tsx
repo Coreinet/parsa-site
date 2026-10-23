@@ -21,7 +21,7 @@ export const buttonClass = (intent: Intent = 'primary', size: Size = 'md', extra
     'focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-signal',
     intent === 'primary' ? 'bg-ink text-paper' : 'border border-line-strong text-ink hover:border-ink',
     size === 'md' ? 'h-12 text-[15px]' : 'h-10 text-sm',
-    size === 'md' ? (intent === 'primary' ? 'pl-6 pr-1.5' : 'px-6') : intent === 'primary' ? 'pl-4 pr-1' : 'px-4',
+    size === 'md' ? (intent === 'primary' ? 'ps-6 pe-1.5' : 'px-6') : intent === 'primary' ? 'ps-4 pe-1' : 'px-4',
     extra
   );
 
@@ -42,7 +42,7 @@ export const ArrowDot = ({ size = 'md' }: { size?: Size }) => (
       size === 'md' ? 'size-9' : 'size-8'
     )}
   >
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rtl:-scale-x-100">
       <path d="M5 12h14M13 6l6 6-6 6" />
     </svg>
   </span>
@@ -74,7 +74,7 @@ export function Button({
   ...props
 }: Omit<ComponentProps<'button'>, 'children'> & { intent?: Intent; size?: Size; label: string; arrow?: boolean; busy?: boolean }) {
   return (
-    <button className={buttonClass(intent, size, cn(!arrow && intent === 'primary' && (size === 'md' ? 'pr-6' : 'pr-4'), className))} style={FILL[intent]} aria-busy={busy || undefined} {...props}>
+    <button className={buttonClass(intent, size, cn(!arrow && intent === 'primary' && (size === 'md' ? 'pe-6' : 'pe-4'), className))} style={FILL[intent]} aria-busy={busy || undefined} {...props}>
       {busy ? <span aria-hidden="true" className="size-3.5 animate-spin rounded-full border-2 border-current border-r-transparent" /> : null}
       <FxLabel>{label}</FxLabel>
       {arrow ? <ArrowDot size={size} /> : null}
@@ -94,7 +94,7 @@ export function TextLink({ className, children, ...props }: ComponentProps<typeo
       {...props}
     >
       {children}
-      <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">
+      <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1 rtl:-scale-x-100 rtl:group-hover:-translate-x-1">
         →
       </span>
     </Link>
@@ -149,7 +149,7 @@ export function PathLabel({ path, className }: { path: string; className?: strin
   const parts = path.split('/').filter(Boolean);
   const last = parts.pop() ?? '';
   return (
-    <span className={cn('font-mono text-xs tracking-[.02em] text-ink-3', className)}>
+    <span dir="ltr" className={cn('font-mono text-xs tracking-[.02em] text-ink-3', className)}>
       /{parts.map(p => `${p}/`).join('')}
       <b className="font-medium text-signal">{last}</b>
     </span>
@@ -191,6 +191,7 @@ export function Section({
   intro,
   action,
   page,
+  home = { name: 'Home', href: '/' },
   children,
   className
 }: {
@@ -201,6 +202,8 @@ export function Section({
   action?: ReactNode;
   /** Breadcrumb name of the standalone page; renders the title as h1. */
   page?: string;
+  /** First breadcrumb item, for translated pages. */
+  home?: { name: string; href: string };
   children: ReactNode;
   className?: string;
 }) {
@@ -212,12 +215,7 @@ export function Section({
           <div className="flex flex-wrap items-end justify-between gap-5">
             <div className="grid max-w-[62ch] gap-3">
               {page && path ? (
-                <Breadcrumb
-                  items={[
-                    { name: 'Home', href: '/' },
-                    { name: page, href: path }
-                  ]}
-                />
+                <Breadcrumb items={[home, { name: page, href: path }]} />
               ) : path ? (
                 <PathLabel path={path} />
               ) : null}

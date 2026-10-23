@@ -5,7 +5,7 @@ import ParticleText from '@/components/effects/ParticleText';
 import { ButtonLink } from '@/components/ui/primitives';
 import { site } from '@/content/site';
 
-export default function NotFound() {
+export default function NotFoundView() {
   // Read after mount: the page is prerendered once, so the server can't know the requested path.
   const [path, setPath] = useState('');
   useEffect(() => {

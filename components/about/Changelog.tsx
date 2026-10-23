@@ -7,12 +7,12 @@ export default function Changelog({
   heading?: 'h3' | 'h4';
 }) {
   return (
-    <ol className="relative grid gap-0 border-l border-line-strong pl-0">
+    <ol className="relative grid gap-0 border-s border-line-strong ps-0">
       {entries.map((e, i) => (
-        <li key={e.version} className="relative grid gap-1 pb-9 pl-7 last:pb-0 sm:grid-cols-[120px_minmax(0,1fr)] sm:gap-6">
+        <li key={e.version} className="relative grid gap-1 pb-9 ps-7 last:pb-0 sm:grid-cols-[120px_minmax(0,1fr)] sm:gap-6">
           <span
             aria-hidden="true"
-            className={`absolute -left-[5px] top-1.5 size-[9px] rounded-full border-2 ${i === 0 ? 'border-signal bg-signal' : 'border-line-strong bg-paper'}`}
+            className={`absolute -start-[5px] top-1.5 size-[9px] rounded-full border-2 ${i === 0 ? 'border-signal bg-signal' : 'border-line-strong bg-paper'}`}
           />
           <div className="flex items-baseline gap-3 font-mono text-[13px] sm:grid sm:content-start sm:gap-0.5">
             <span className={i === 0 ? 'font-medium text-signal' : 'text-ink'}>{e.version}</span>

@@ -23,6 +23,7 @@ export interface PortraitCardProps {
   status?: string;
   available?: boolean;
   contactHref?: string;
+  contactLabel?: string;
   /** mono caption under the card */
   caption?: string;
   /** max tilt in degrees */
@@ -41,6 +42,7 @@ export default function PortraitCard({
   status,
   available = false,
   contactHref = '/contact',
+  contactLabel = 'Contact',
   caption,
   maxTilt = 6,
   priority = false,
@@ -165,7 +167,7 @@ export default function PortraitCard({
             href={contactHref}
             className="flex-none rounded-sm border border-white/25 px-3 py-2 text-[13px] font-semibold transition-colors hover:border-white/60 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
-            Contact →
+            {contactLabel} <span aria-hidden="true" className="inline-block rtl:-scale-x-100">→</span>
           </Link>
         </div>
       </div>

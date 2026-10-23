@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Project } from '@/lib/content';
 import { ExampleBadge, Tag } from '@/components/ui/primitives';
 import { cn } from '@/lib/cn';
+import { ui, type Locale } from '@/content/i18n';
 
 export const STATUS: Record<Project['status'], { label: string; mark: string; className: string }> = {
   live: { label: 'Live', mark: '●', className: 'text-ok' },
@@ -11,18 +12,21 @@ export const STATUS: Record<Project['status'], { label: string; mark: string; cl
   archived: { label: 'Archived', mark: '○', className: 'text-ink-3' }
 };
 
-export function Status({ status, className }: { status: Project['status']; className?: string }) {
+export function Status({ status, className, locale = 'en' }: { status: Project['status']; className?: string; locale?: Locale }) {
   const s = STATUS[status];
   return (
     <span className={cn('inline-flex items-center gap-1.5 text-[13px] font-medium', s.className, className)}>
       <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
-      {s.label}
+      {ui[locale].status[status]}
     </span>
   );
 }
 
-/** One link per card; the mock frame lifts and the arrow moves diagonally on hover. */
-export function ProjectCard({ project, featured = false }: { project: Project; featured?: boolean }) {
+/**
+ * One link per card; the mock frame lifts and the arrow moves diagonally on hover. On the
+ * translated sites `summary` replaces the English one; the case study it links to is English.
+ */
+export function ProjectCard({ project, featured = false, locale = 'en', summary }: { project: Project; featured?: boolean; locale?: Locale; summary?: string }) {
   return (
     <Link
       href={`/work/${project.slug}`}
@@ -45,7 +49,7 @@ export function ProjectCard({ project, featured = false }: { project: Project; f
           {project.year} · {project.platform}
         </span>
         <span className="absolute right-3 top-3 rounded-full bg-surface/90 px-3 py-1.5 backdrop-blur">
-          <Status status={project.status} />
+          <Status status={project.status} locale={locale} />
         </span>
       </div>
       <div className="grid gap-1.5">
@@ -53,12 +57,12 @@ export function ProjectCard({ project, featured = false }: { project: Project; f
           <span className="transition-colors group-hover:text-signal">{project.title}</span>
           <span
             aria-hidden="true"
-            className="grid size-9 flex-none place-items-center rounded-full border border-line-strong text-base text-ink-3 transition-all duration-300 group-hover:-rotate-45 group-hover:border-ink group-hover:bg-ink group-hover:text-paper"
+            className="grid size-9 flex-none place-items-center rounded-full border border-line-strong text-base text-ink-3 transition-all duration-300 group-hover:-rotate-45 group-hover:border-ink group-hover:bg-ink group-hover:text-paper rtl:-scale-x-100 rtl:group-hover:rotate-45"
           >
             →
           </span>
         </h3>
-        <p className="text-ink-2">{project.summary}</p>
+        <p className="text-ink-2">{summary ?? project.summary}</p>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {project.example ? <ExampleBadge /> : null}

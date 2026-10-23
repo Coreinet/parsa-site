@@ -11,6 +11,8 @@ const buildSha = (() => {
 })();
 
 const nextConfig: NextConfig = {
+  // English, Persian and Turkish each have a root layout, so unmatched URLs need app/global-not-found.tsx.
+  experimental: { globalNotFound: true },
   env: {
     NEXT_PUBLIC_BUILD_DATE: new Date().toISOString().slice(0, 10),
     NEXT_PUBLIC_BUILD_SHA: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? buildSha

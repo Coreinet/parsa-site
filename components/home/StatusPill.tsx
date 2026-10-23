@@ -3,7 +3,17 @@
 import { useEffect, useState } from 'react';
 
 /** Availability line: a status dot, the label, and local time (rendered after mount). */
-export default function StatusPill({ available, label, timeZone }: { available: boolean; label: string; timeZone: string }) {
+export default function StatusPill({
+  available,
+  label,
+  timeZone,
+  timeLabel = 'local time'
+}: {
+  available: boolean;
+  label: string;
+  timeZone: string;
+  timeLabel?: string;
+}) {
   const [time, setTime] = useState('');
 
   useEffect(() => {
@@ -21,7 +31,7 @@ export default function StatusPill({ available, label, timeZone }: { available: 
         <span className={`size-1.5 rounded-full ${available ? 'bg-ok' : 'bg-ink-3'}`} />
       </span>
       <span className="font-medium text-ink">{label}</span>
-      {time ? <span className="tabular text-ink-3">{time} local time</span> : null}
+      {time ? <span className="tabular text-ink-3">{time} {timeLabel}</span> : null}
     </p>
   );
 }

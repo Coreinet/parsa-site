@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { languageAlternates, localePath, TRANSLATED_PATHS, type TranslatedPath } from '@/content/i18n';
 import { site } from '@/content/site';
 import { topics } from '@/content/topics';
 import { getArticles, getProjects } from '@/lib/content';
@@ -7,7 +8,12 @@ import { absoluteUrl } from '@/lib/site-url';
 /**
  * Every indexable URL, with image entries (image sitemap) for the portrait, article covers
  * and project covers. Example content is excluded in production by getArticles/getProjects.
+ * Pages that exist in English, Persian and Turkish list each other as hreflang alternates.
  */
+
+const alternates = (path: TranslatedPath) => ({
+  languages: Object.fromEntries(Object.entries(languageAlternates(path)).map(([lang, p]) => [lang, absoluteUrl(p)]))
+});
 export default function sitemap(): MetadataRoute.Sitemap {
   const articles = getArticles();
   const projects = getProjects();
@@ -20,20 +26,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ...(latest ? { lastModified: latest } : {}),
       changeFrequency: 'weekly',
       priority: 1,
-      images: [absoluteUrl(site.portrait.src)]
+      images: [absoluteUrl(site.portrait.src)],
+      alternates: alternates('/')
     },
     {
       url: absoluteUrl('/about'),
       ...(latest ? { lastModified: latest } : {}),
       changeFrequency: 'monthly',
       priority: 0.9,
-      images: [absoluteUrl(site.portrait.src)]
+      images: [absoluteUrl(site.portrait.src)],
+      alternates: alternates('/about')
     },
     {
       url: absoluteUrl('/work'),
       changeFrequency: 'monthly',
       priority: 0.9,
-      images: projects.map(p => absoluteUrl(p.cover))
+      images: projects.map(p => absoluteUrl(p.cover)),
+      alternates: alternates('/work')
     },
     {
       url: absoluteUrl('/blog'),
@@ -42,7 +51,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9
     },
     { url: absoluteUrl('/stack'), changeFrequency: 'monthly', priority: 0.6 },
-    { url: absoluteUrl('/contact'), changeFrequency: 'yearly', priority: 0.7 },
+    { url: absoluteUrl('/contact'), changeFrequency: 'yearly', priority: 0.7, alternates: alternates('/contact') },
+    ...(['fa', 'tr'] as const).flatMap(locale =>
+      TRANSLATED_PATHS.map(path => ({
+        url: absoluteUrl(localePath(locale, path)),
+        changeFrequency: 'monthly' as const,
+        priority: path === '/' ? 0.9 : 0.7,
+        ...(path === '/' || path === '/about' ? { images: [absoluteUrl(site.portrait.src)] } : {}),
+        alternates: alternates(path)
+      }))
+    ),
     ...topics.map(t => ({
       url: absoluteUrl(`/topics/${t.id}`),
       ...(latest ? { lastModified: latest } : {}),

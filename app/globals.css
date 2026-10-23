@@ -44,9 +44,9 @@
   --color-err: var(--err);
   --color-err-soft: var(--err-soft);
 
-  --font-display: var(--font-familjen), ui-sans-serif, system-ui, sans-serif;
-  --font-prose: var(--font-newsreader), Georgia, "Times New Roman", serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-familjen), var(--font-vazir), ui-sans-serif, system-ui, sans-serif;
+  --font-prose: var(--font-newsreader), var(--font-vazir), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-jetbrains), var(--font-vazir), ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --text-display-xl: clamp(3.5rem, 1.6rem + 8.4vw, 11rem);
   --text-display-xl--line-height: .84;
@@ -166,3 +166,9 @@ html { scroll-behavior: smooth; }
 .prose tr:last-child td { border-bottom: 0; }
 /* Sources list at the end of every article */
 .prose h2#sources + ol, .prose h2#sources + ul { font-family: var(--font-display); font-size: 15px; line-height: 1.55; }
+
+/* Persian: letter-spacing breaks the joins between letters, and the script needs taller lines.
+   Unlayered on purpose, so it wins over the tracking and leading utilities. */
+html:lang(fa) * { letter-spacing: normal; }
+html:lang(fa) .text-display { line-height: 1.25; }
+html:lang(fa) .text-display-xl { line-height: 1.1; }

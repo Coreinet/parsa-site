@@ -1,3 +1,5 @@
+import { isTranslated, localePath, splitLocale, ui, type Locale } from '@/content/i18n';
+
 /**
  * Multi-page site: every nav item is its own URL with its own title, description and
  * structured data. The home page keeps a short preview of each section that links to it.
@@ -13,12 +15,21 @@ export const PAGES = [
 
 export type PageId = (typeof PAGES)[number]['id'];
 
-export const pageHref = (id: PageId): string => PAGES.find(p => p.id === id)?.href ?? '/';
+/** A page's URL in a language; pages that are not translated link to the English page. */
+export const pageHref = (id: PageId, locale: Locale = 'en'): string => {
+  const href = PAGES.find(p => p.id === id)?.href ?? '/';
+  return isTranslated(href) ? localePath(locale, href) : href;
+};
+
+/** The nav in a language. Translated sites leave out Stack, which has no translation. */
+export const pagesFor = (locale: Locale): { id: PageId; label: string; href: string }[] =>
+  PAGES.filter(p => locale === 'en' || p.id !== 'stack').map(p => ({ id: p.id, label: ui[locale].nav[p.id], href: pageHref(p.id, locale) }));
 
 /** Which nav item a path belongs to. Topic guides live under the blog. */
 export const pageForPath = (pathname: string): PageId | null => {
-  if (pathname === '/') return 'home';
-  if (pathname.startsWith('/topics/')) return 'blog';
-  const hit = PAGES.find(p => p.href !== '/' && (pathname === p.href || pathname.startsWith(`${p.href}/`)));
+  const { path } = splitLocale(pathname);
+  if (path === '/') return 'home';
+  if (path.startsWith('/topics/')) return 'blog';
+  const hit = PAGES.find(p => p.href !== '/' && (path === p.href || path.startsWith(`${p.href}/`)));
   return hit?.id ?? null;
 };

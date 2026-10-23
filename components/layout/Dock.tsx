@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { ui, type Locale } from '@/content/i18n';
 import { pageHref, type PageId } from '@/content/nav';
 import { useActivePage } from '@/components/layout/useActivePage';
 import SocialIcons from '@/components/ui/SocialIcons';
@@ -13,23 +14,23 @@ const Icon = ({ children }: { children: ReactNode }) => (
   </svg>
 );
 
-const ITEMS: { id: PageId; label: string; icon: ReactNode }[] = [
-  { id: 'home', label: 'Home', icon: <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /> },
-  { id: 'work', label: 'Work', icon: <><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18" /></> },
-  { id: 'blog', label: 'Blog', icon: <><path d="M5 4h11l3 3v13H5z" /><path d="M9 10h7M9 14h7" /></> },
-  { id: 'contact', label: 'Contact', icon: <><path d="M4 6h16v12H4z" /><path d="M4 7l8 6 8-6" /></> }
+const ITEMS: { id: PageId; icon: ReactNode }[] = [
+  { id: 'home', icon: <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /> },
+  { id: 'work', icon: <><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18" /></> },
+  { id: 'blog', icon: <><path d="M5 4h11l3 3v13H5z" /><path d="M9 10h7M9 14h7" /></> },
+  { id: 'contact', icon: <><path d="M4 6h16v12H4z" /><path d="M4 7l8 6 8-6" /></> }
 ];
 
-const MORE: { id: PageId; label: string }[] = [
-  { id: 'about', label: 'About' },
-  { id: 'stack', label: 'Stack' }
-];
+const MORE: PageId[] = ['about', 'stack'];
 
 /**
  * Phones and tablets: a floating dock where the thumb is, plus a "More" bottom sheet.
  * Every item is a page. Hidden on desktop, where the PillNav takes over.
  */
-export default function Dock() {
+export default function Dock({ locale = 'en' }: { locale?: Locale }) {
+  const t = ui[locale];
+  // Translated sites have no Stack page.
+  const more = MORE.filter(id => locale === 'en' || id !== 'stack');
   const pathname = usePathname();
   const active = useActivePage();
   const sheetRef = useRef<HTMLDialogElement>(null);
@@ -46,7 +47,7 @@ export default function Dock() {
     else sheet.showModal();
   };
 
-  const moreActive = MORE.some(m => m.id === active);
+  const moreActive = more.some(id => id === active);
 
   return (
     <>
@@ -57,14 +58,14 @@ export default function Dock() {
             return (
               <li key={item.id}>
                 <Link
-                  href={pageHref(item.id)}
+                  href={pageHref(item.id, locale)}
                   aria-current={on ? 'page' : undefined}
                   className={`grid justify-items-center gap-0.5 rounded-full py-1.5 text-[11px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-signal ${
                     on ? 'bg-ink text-paper' : 'text-ink-3 hover:text-ink'
                   }`}
                 >
                   <Icon>{item.icon}</Icon>
-                  {item.label}
+                  {t.nav[item.id]}
                 </Link>
               </li>
             );
@@ -80,7 +81,7 @@ export default function Dock() {
               }`}
             >
               <Icon>{open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M5 8h14M5 12h14M5 16h14" />}</Icon>
-              {open ? 'Close' : 'More'}
+              {open ? t.close : t.more}
             </button>
           </li>
         </ul>
@@ -88,7 +89,7 @@ export default function Dock() {
 
       <dialog
         ref={sheetRef}
-        aria-label="More pages"
+        aria-label={t.morePages}
         onClose={() => setOpen(false)}
         onToggle={e => setOpen((e.currentTarget as HTMLDialogElement).open)}
         onClick={e => {
@@ -98,16 +99,16 @@ export default function Dock() {
       >
         <div className="mx-auto grid max-w-[520px] gap-1 px-6 pb-[calc(env(safe-area-inset-bottom,0px)+104px)] pt-3">
           <div className="mb-3 h-1 w-9 justify-self-center rounded-full bg-line-strong" aria-hidden="true" />
-          {MORE.map(m => (
+          {more.map(id => (
             <Link
-              key={m.id}
-              href={pageHref(m.id)}
+              key={id}
+              href={pageHref(id, locale)}
               onClick={() => sheetRef.current?.close()}
-              aria-current={active === m.id ? 'page' : undefined}
+              aria-current={active === id ? 'page' : undefined}
               className="flex items-baseline justify-between py-2 text-2xl font-semibold tracking-[-0.02em] aria-[current=page]:text-signal"
             >
-              {m.label}
-              <span className="font-mono text-xs font-normal text-ink-3">{pageHref(m.id)}</span>
+              {t.nav[id]}
+              <span dir="ltr" className="font-mono text-xs font-normal text-ink-3">{pageHref(id, locale)}</span>
             </Link>
           ))}
           <div className="mt-4 border-t border-line pt-4">

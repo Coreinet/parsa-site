@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 /** Copy the address in one tap; a toast confirms. Falls back to a mailto link. */
-export default function CopyEmail({ email }: { email: string }) {
+export default function CopyEmail({ email, labels = { copy: 'Copy email', copied: 'Email copied' } }: { email: string; labels?: { copy: string; copied: string } }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async (): Promise<void> => {
@@ -20,6 +20,7 @@ export default function CopyEmail({ email }: { email: string }) {
     <div className="grid justify-items-start gap-3">
       <a
         href={`mailto:${email}`}
+        dir="ltr"
         className="max-w-full break-all text-[clamp(22px,3.4vw,34px)] font-semibold leading-tight tracking-[-0.025em] text-signal underline decoration-1 underline-offset-[6px] hover:decoration-2"
       >
         {email}
@@ -33,12 +34,12 @@ export default function CopyEmail({ email }: { email: string }) {
           <rect x="9" y="9" width="11" height="11" rx="2" />
           <path d="M5 15V5a1 1 0 0 1 1-1h9" />
         </svg>
-        Copy email
+        {labels.copy}
       </button>
       <div role="status" aria-live="polite" className="h-0">
         {copied ? (
           <span className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+96px)] left-1/2 z-[70] flex -translate-x-1/2 items-center gap-2.5 rounded-full bg-ink px-5 py-3 text-sm text-paper shadow-float desk:bottom-8">
-            <span className="text-ok">✓</span> Email copied
+            <span className="text-ok">✓</span> {labels.copied}
           </span>
         ) : null}
       </div>

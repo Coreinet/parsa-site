@@ -1,3 +1,4 @@
+import { copy, localePath, type Translated, type TranslatedPath } from '@/content/i18n';
 import { site } from '@/content/site';
 import type { Topic } from '@/content/topics';
 import { topicsForArticle } from '@/content/topics';
@@ -14,6 +15,7 @@ import { absoluteUrl, SITE_URL } from '@/lib/site-url';
  *   SoftwareSourceCode/CreativeWork ──author──▶ Person
  *   CollectionPage (/work, /blog, /stack, /topics/x) ──mainEntity──▶ ItemList of pages
  *   ContactPage (/contact) ──about──▶ Person
+ *   /fa and /tr pages ──translationOfWork──▶ the English page, ──about──▶ Person
  */
 
 export const PERSON_ID = `${SITE_URL}/#person`;
@@ -31,6 +33,8 @@ export function personSchema(): Json {
     '@type': 'Person',
     '@id': PERSON_ID,
     name: site.name,
+    // The name in Persian script, as written on the /fa pages.
+    alternateName: [copy.fa.name],
     givenName: site.firstName,
     familyName: site.lastName,
     url: SITE_URL,
@@ -227,6 +231,31 @@ export function contactPageSchema(description: string): Json {
     about: { '@id': PERSON_ID },
     mainEntity: { '@id': PERSON_ID },
     inLanguage: 'en'
+  };
+}
+
+/** A page of the Persian or Turkish site: the same person, in another language, linked to the English page. */
+export function translatedPageSchema(
+  type: 'WebPage' | 'ProfilePage' | 'CollectionPage' | 'ContactPage',
+  locale: Translated,
+  path: TranslatedPath,
+  name: string,
+  description: string
+): Json {
+  const url = absoluteUrl(localePath(locale, path));
+  return {
+    '@type': type,
+    '@id': `${url}#page`,
+    url,
+    name,
+    description,
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': PERSON_ID },
+    ...(type === 'ProfilePage' || type === 'ContactPage' ? { mainEntity: { '@id': PERSON_ID } } : {}),
+    ...(type === 'ProfilePage' ? { primaryImageOfPage: { '@id': `${SITE_URL}/#portrait` } } : {}),
+    // The English home page is the WebSite node itself, so only inner pages point to a translated page.
+    ...(path === '/' ? {} : { translationOfWork: { '@id': path === '/about' ? PROFILE_PAGE_ID : `${absoluteUrl(path)}#page` } }),
+    inLanguage: locale
   };
 }
 

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState, type ReactNode, type CSSProperties } from 'react';
 import PillNav from '@/components/layout/PillNav';
+import { localePath, ui, type Locale } from '@/content/i18n';
 import Monogram from '@/components/ui/Monogram';
 
 /**
@@ -10,7 +11,7 @@ import Monogram from '@/components/ui/Monogram';
  * returns on scroll up. Phones: monogram + actions only; navigation lives in the bottom Dock.
  * `actions` takes the ⌘K button and ThemeToggle once they exist.
  */
-export default function SiteHeader({ actions }: { actions?: ReactNode }) {
+export default function SiteHeader({ actions, locale = 'en' }: { actions?: ReactNode; locale?: Locale }) {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
@@ -43,8 +44,8 @@ export default function SiteHeader({ actions }: { actions?: ReactNode }) {
       }`}
     >
       <Link
-        href="/"
-        aria-label="Parsa Alizadeh, home"
+        href={localePath(locale)}
+        aria-label={ui[locale].homeLabel}
         style={{ '--fx-fill': 'var(--ink)' } as CSSProperties}
         className="fx-fill group grid size-11 place-items-center rounded-full border border-line-strong bg-surface/85 text-ink backdrop-blur-md transition-colors duration-300 hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
       >
@@ -52,7 +53,7 @@ export default function SiteHeader({ actions }: { actions?: ReactNode }) {
       </Link>
 
       <div className="hidden desk:block">
-        <PillNav />
+        <PillNav locale={locale} />
       </div>
 
       <div className="flex items-center gap-2">{actions}</div>

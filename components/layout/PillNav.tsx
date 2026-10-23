@@ -10,16 +10,17 @@
 
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
-import { PAGES } from '@/content/nav';
+import type { Locale } from '@/content/i18n';
+import { pagesFor } from '@/content/nav';
 import { useActivePage } from '@/components/layout/useActivePage';
 
-export default function PillNav() {
+export default function PillNav({ locale = 'en' }: { locale?: Locale }) {
   const active = useActivePage();
 
   return (
     <nav aria-label="Main" className="h-12 rounded-full border border-line-strong bg-surface/85 p-1 shadow-float backdrop-blur-md">
       <ul className="flex h-full items-stretch gap-1">
-        {PAGES.map(s => {
+        {pagesFor(locale).map(s => {
           const on = active === s.id;
           return (
             <li key={s.id} className="relative flex">

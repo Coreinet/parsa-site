@@ -1,3 +1,4 @@
+import { copy } from '@/content/i18n';
 import { site } from '@/content/site';
 import { topics } from '@/content/topics';
 import { getArticles, getProjects } from '@/lib/content';
@@ -19,7 +20,7 @@ export function GET() {
     '',
     `> ${site.description}`,
     '',
-    `${site.name} is a freelance software developer (programming since 2021, freelance since 2024) working on web development, mobile development and artificial intelligence. Languages: Persian, English, Turkish.`,
+    `${site.name} (in Persian: ${copy.fa.name}) is a freelance software developer (programming since 2021, freelance since 2024) working on web development, mobile development and artificial intelligence. Languages: Persian, English, Turkish.`,
     '',
     '## Profile',
     '',
@@ -28,6 +29,8 @@ export function GET() {
     `- [Blog](${absoluteUrl('/blog')}): all articles and topic guides`,
     `- [Stack](${absoluteUrl('/stack')}): tools and technologies, grouped by layer`,
     `- [Contact](${absoluteUrl('/contact')}): email and contact form`,
+    `- [${copy.fa.name}, فارسی](${absoluteUrl('/fa')}): the site in Persian`,
+    `- [${site.name}, Türkçe](${absoluteUrl('/tr')}): the site in Turkish`,
     ...site.socials.map(s => `- [${s.label}](${s.href})`),
     `- Email: ${site.email}`,
     '',
