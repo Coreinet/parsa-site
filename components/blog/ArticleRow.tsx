@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { fill, pageText } from '@/content/pageText';
-import { formatDate, type Article } from '@/lib/content';
+import { displayDate, formatDate, type Article } from '@/lib/content';
 import { ExampleBadge, Tag } from '@/components/ui/primitives';
 
 /** Articles are a dated index, not cards: a journal's table of contents. */
@@ -13,13 +13,13 @@ export function ArticleRow({ article, thumb = false, heading: H = 'h3' }: { arti
       className="group grid grid-cols-[minmax(0,1fr)] gap-3 border-t border-line py-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal sm:grid-cols-[104px_minmax(0,1fr)] sm:gap-4"
     >
       <time dateTime={formatDate(article.date)} className="tabular pt-1 font-mono text-xs text-ink-3">
-        {formatDate(article.date)}
+        {displayDate(article.date, article.locale)}
       </time>
       <div className={thumb ? 'grid gap-4 sm:grid-cols-[minmax(0,1fr)_120px]' : ''}>
         <div className="grid content-start gap-1.5">
           <div className="flex flex-wrap gap-1.5">
             <Tag category>{t.categories[article.category]}</Tag>
-            <Tag>{fill(t.article.min, { n: article.readingMinutes })}</Tag>
+            <Tag>{fill(t.article.min, { n: article.readingMinutes.toLocaleString(article.locale) })}</Tag>
             {article.example ? <ExampleBadge /> : null}
           </div>
           <H className="text-[19px] font-semibold leading-snug tracking-[-0.01em] transition-colors group-hover:text-signal">{article.title}</H>
@@ -55,7 +55,7 @@ export function FeaturedArticle({ article }: { article: Article }) {
         <div className="flex flex-wrap items-center gap-1.5">
           <Tag category>{t.categories[article.category]}</Tag>
           <span className="tabular font-mono text-xs text-ink-3">
-            {formatDate(article.date)} · {fill(t.article.minRead, { n: article.readingMinutes })}
+            {displayDate(article.date, article.locale)} · {fill(t.article.minRead, { n: article.readingMinutes.toLocaleString(article.locale) })}
           </span>
           {article.example ? <ExampleBadge /> : null}
         </div>

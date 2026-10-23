@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { localePath, ui, type Locale } from '@/content/i18n';
 import { pageText } from '@/content/pageText';
 import { localizeTopic, topics } from '@/content/topics';
-import { CATEGORIES, getArticles } from '@/lib/content';
+import { CATEGORIES, displayYear, getArticles } from '@/lib/content';
 
 const HOME_LIMIT = 3;
 
@@ -60,7 +60,7 @@ export default function BlogSection({ page = false, locale = 'en' }: { page?: bo
           categories={categories}
           entries={articles.map(a => ({
             slug: a.slug,
-            year: String(a.date.getUTCFullYear()),
+            year: displayYear(a.date, locale),
             category: a.category,
             search: `${a.title} ${a.description} ${a.tags.join(' ')} ${a.category}`.toLowerCase(),
             node: <ArticleRow article={a} thumb heading="h4" />

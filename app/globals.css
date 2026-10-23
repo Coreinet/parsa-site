@@ -44,9 +44,9 @@
   --color-err: var(--err);
   --color-err-soft: var(--err-soft);
 
-  --font-display: var(--font-familjen), var(--font-vazir), ui-sans-serif, system-ui, sans-serif;
-  --font-prose: var(--font-newsreader), var(--font-vazir), Georgia, "Times New Roman", serif;
-  --font-mono: var(--font-jetbrains), var(--font-vazir), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-familjen), var(--font-yekan), ui-sans-serif, system-ui, sans-serif;
+  --font-prose: var(--font-newsreader), var(--font-yekan), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-jetbrains), var(--font-yekan), ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --text-display-xl: clamp(3.5rem, 1.6rem + 8.4vw, 11rem);
   --text-display-xl--line-height: .84;
@@ -174,7 +174,5 @@ html { scroll-behavior: smooth; }
 html:lang(fa) * { letter-spacing: normal; }
 html:lang(fa) .text-display { line-height: 1.25; }
 html:lang(fa) .text-display-xl { line-height: 1.1; }
-/* Persian headings in Noto Kufi; Latin letters inside them keep Familjen Grotesk. Body text stays Vazirmatn. */
-html:lang(fa) :is(h1, h2, h3, .text-display, .text-display-xl, .text-h1, .text-h2) {
-  font-family: var(--font-familjen), var(--font-kufi), var(--font-vazir), ui-sans-serif, system-ui, sans-serif;
-}
+/* Persian pages set headings and text in IRANYekanX, Latin words included, as one typeface; code stays mono. */
+html:lang(fa) { --font-familjen: var(--font-yekan); --font-newsreader: var(--font-yekan); }

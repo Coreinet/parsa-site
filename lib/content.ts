@@ -184,4 +184,19 @@ export function getRelated(article: Article, limit = 3): Article[] {
     .map(x => x.a);
 }
 
+/** Machine-readable date for <time dateTime>. */
 export const formatDate = (d: Date): string => d.toISOString().slice(0, 10);
+
+/**
+ * The date as readers of each language expect it: ISO in English, the Solar Hijri calendar
+ * in Persian ("۱ آبان ۱۴۰۵"), day-month-year in Turkish ("23 Ekim 2026").
+ */
+const DATE_FORMATS: Record<Exclude<Locale, 'en'>, Intl.DateTimeFormat> = {
+  fa: new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }),
+  tr: new Intl.DateTimeFormat('tr-TR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
+};
+export const displayDate = (d: Date, locale: Locale): string => (locale === 'en' ? formatDate(d) : DATE_FORMATS[locale].format(d));
+
+/** The year an article is filed under in the archive, in the language's calendar. */
+export const displayYear = (d: Date, locale: Locale): string =>
+  locale === 'fa' ? new Intl.DateTimeFormat('fa-IR', { year: 'numeric', timeZone: 'UTC' }).format(d) : String(d.getUTCFullYear());

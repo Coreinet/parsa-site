@@ -6,6 +6,7 @@ import SocialIcons from '@/components/ui/SocialIcons';
 import { ButtonLink, Container } from '@/components/ui/primitives';
 import { copy, localePath, type Translated } from '@/content/i18n';
 import { site } from '@/content/site';
+import { displayYear } from '@/lib/content';
 
 /**
  * The home hero of the Persian and Turkish sites. Turkish uses the Latin name lockup; Persian
@@ -58,7 +59,7 @@ export default function LocaleHero({ locale }: { locale: Translated }) {
             />
           </div>
           <figcaption className="mt-2 font-mono text-[11px] text-ink-3">
-            {c.name} · {new Date().getFullYear()}
+            {c.name} · {displayYear(new Date(), locale)}
           </figcaption>
         </figure>
       </div>

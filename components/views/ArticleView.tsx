@@ -13,7 +13,7 @@ import { Container, ExampleBadge, Tag } from '@/components/ui/primitives';
 import { copy, localePath, ui, type Locale } from '@/content/i18n';
 import { fill, pageText } from '@/content/pageText';
 import { site } from '@/content/site';
-import { formatDate, getArticle, getArticles, getRelated, localesOf } from '@/lib/content';
+import { displayDate, formatDate, getArticle, getArticles, getRelated, localesOf } from '@/lib/content';
 import { pageMetadata } from '@/lib/metadata';
 import { articleSchema, breadcrumbSchema, graph } from '@/lib/schema';
 
@@ -91,14 +91,14 @@ export default function ArticleView({ slug, locale }: { slug: string; locale: Lo
               </Link>
             </div>
             <span className="tabular font-mono text-xs text-ink-3">
-              <time dateTime={formatDate(article.date)}>{formatDate(article.date)}</time>
+              <time dateTime={formatDate(article.date)}>{displayDate(article.date, locale)}</time>
               {article.updated ? (
                 <>
                   {' '}
-                  · {t.article.updated} <time dateTime={formatDate(article.updated)}>{formatDate(article.updated)}</time>
+                  · {t.article.updated} <time dateTime={formatDate(article.updated)}>{displayDate(article.updated, locale)}</time>
                 </>
               ) : null}{' '}
-              · {fill(t.article.minRead, { n: article.readingMinutes })}
+              · {fill(t.article.minRead, { n: article.readingMinutes.toLocaleString(locale) })}
             </span>
           </div>
           <div className="flex flex-wrap gap-1.5">
