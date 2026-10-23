@@ -1,0 +1,128 @@
+---
+title: "How to evaluate a RAG system: retrieval metrics, faithfulness and LLM judges"
+seoTitle: "How to evaluate a RAG system"
+description: Measure retrieval and generation separately, with recall@k, MRR and nDCG for the retriever and faithfulness for the answer, and what research says about using language models as judges.
+date: 2026-10-23
+category: ai
+tags: [ai, llm, rag, evaluation, research]
+cover: /images/blog/evaluating-rag-systems.png
+coverAlt: Diagram of a RAG evaluation, a test set of questions feeds two separate checks, retrieval scored with recall at k, MRR and nDCG, and generation scored with faithfulness and answer relevance
+---
+
+A retrieval-augmented generation system can fail in two different places. The retriever can miss the passage that holds the answer, or the language model can ignore that passage and write something else. A single “is the answer good?” score cannot tell these apart, so it cannot tell you what to fix. This post splits evaluation into the two stages, shows the standard retrieval metrics in code, and summarises what research says about scoring answers automatically.
+
+If the pipeline itself is new to you, start with [how retrieval-augmented generation works](/blog/retrieval-augmented-generation).
+
+## Start with a test set
+
+Every metric below needs the same thing: a set of questions where you already know the right answer. For each question, write down:
+
+- **The question**, phrased the way real users phrase it.
+- **The relevant chunks**, the IDs of the passages in your index that contain the answer.
+- **A reference answer**, short, written or checked by a person.
+
+Fifty to a few hundred questions is enough to compare two versions of a pipeline. Include questions that should have no answer in your documents, so you can check that the system says so instead of inventing one.
+
+## Stage 1: retrieval
+
+Retrieval is a ranking problem, so it is measured with information retrieval metrics. Each one answers a slightly different question.
+
+- **Recall@k:** of the relevant chunks, what share appear in the top k results? This matters most for RAG, because the model can only use what it is given.
+- **Reciprocal rank:** one divided by the position of the first relevant result. Averaged over all questions it is the mean reciprocal rank, MRR, a metric popularised by the TREC question answering track [1].
+- **nDCG@k:** normalised discounted cumulative gain, introduced by Järvelin and Kekäläinen [2]. It supports graded relevance (a chunk can be partly relevant) and rewards putting the best chunks first.
+
+```python title="retrieval_metrics.py"
+import math
+
+def recall_at_k(retrieved, relevant, k):
+    """Share of the relevant chunk IDs that appear in the top k results."""
+    if not relevant:
+        return 0.0
+    return len(set(retrieved[:k]) & relevant) / len(relevant)
+
+def reciprocal_rank(retrieved, relevant):
+    """1 / rank of the first relevant result, or 0 if none was retrieved."""
+    for rank, chunk_id in enumerate(retrieved, start=1):
+        if chunk_id in relevant:
+            return 1 / rank
+    return 0.0
+
+def ndcg_at_k(retrieved, relevance, k):
+    """relevance maps chunk ID to a graded score, 0 meaning not relevant."""
+    dcg = sum(relevance.get(c, 0) / math.log2(i + 2) for i, c in enumerate(retrieved[:k]))
+    ideal = sorted(relevance.values(), reverse=True)[:k]
+    idcg = sum(r / math.log2(i + 2) for i, r in enumerate(ideal))
+    return dcg / idcg if idcg else 0.0
+
+# One question: the retriever returned these chunk IDs, in order.
+retrieved = ["c7", "c2", "c9", "c4", "c1"]
+relevant = {"c2", "c4"}
+
+print(recall_at_k(retrieved, relevant, k=3))  # 0.5: only c2 is in the top 3
+print(reciprocal_rank(retrieved, relevant))   # 0.5: first hit at rank 2
+print(ndcg_at_k(retrieved, {"c2": 2, "c4": 1}, k=5))
+```
+
+The `log2(i + 2)` discount is the form most libraries use today. The original paper defines the discount slightly differently, but the idea is the same: a relevant result lower in the list is worth less [2].
+
+Run these over the whole test set and average them. Then change one thing at a time (chunk size, embedding model, number of results, a reranker) and compare. Because retrieval metrics need no language model, they are cheap and fully repeatable.
+
+<Callout type="tip">
+Pick k to match what you actually send to the model. If the prompt gets the top 5 chunks, recall@5 is the number that limits answer quality, not recall@20.
+</Callout>
+
+## Stage 2: generation
+
+Once the right chunks reach the model, the question becomes whether the answer uses them. Two properties matter most:
+
+- **Faithfulness:** every claim in the answer is supported by the retrieved context. An unfaithful answer is a hallucination, even when it happens to be true.
+- **Answer relevance:** the answer addresses the question that was asked, rather than something nearby.
+
+RAGAS, by Shahul Es and colleagues, proposes automated versions of both, plus a third for the context [3]:
+
+- **Faithfulness:** a language model splits the answer into individual statements and checks each against the context. The score is the share of statements that are supported [3].
+- **Answer relevance:** a language model generates questions that the answer would fit, and the score is their embedding similarity to the original question [3].
+- **Context relevance:** the share of sentences in the retrieved context that are actually needed to answer the question, which penalises retrieving a lot of noise [3].
+
+These scores need no reference answer, which makes them useful for monitoring real traffic. With a test set, you can also compare the answer to the reference answer directly.
+
+## Can a language model be the judge?
+
+Faithfulness and relevance checks depend on a language model grading text. Lianmin Zheng and colleagues studied this in “Judging LLM-as-a-Judge” [4]. They found that GPT-4 as a judge agreed with human preferences over 80% of the time, about the same rate at which human judges agreed with each other [4].
+
+They also documented biases to design around [4]:
+
+- **Position bias:** preferring an answer because of where it appears, for example the first of two.
+- **Verbosity bias:** preferring longer answers, even when they are not better.
+- **Self-enhancement bias:** preferring answers written by the same model.
+
+Practical defences follow from that list: swap the order when comparing two answers and keep only consistent verdicts, ask for a score against a written rubric rather than a free opinion, and avoid using the model under test as its own judge.
+
+ARES, by Jon Saad-Falcon and colleagues, adds a step for trusting the numbers [5]. It trains lightweight judge models for context relevance, faithfulness and answer relevance, then uses a small set of human-labelled examples to correct the judges' errors and put confidence intervals on the results, a technique called prediction-powered inference [5].
+
+<Callout type="note">
+Whatever judge you use, label 30 to 50 examples by hand and check how often the judge agrees with you. An automated score you have never compared to a person is a guess.
+</Callout>
+
+## A workable routine
+
+1. Build a test set with questions, relevant chunk IDs and reference answers.
+2. Measure retrieval with recall@k, MRR and nDCG. Fix retrieval first, since it sets the ceiling.
+3. Measure generation with faithfulness and answer relevance, using a judge you have checked against human labels.
+4. Change one component at a time and rerun everything.
+5. Keep the test set under version control and add every real failure you find to it.
+
+## Summary
+
+- Evaluate retrieval and generation separately, or you cannot tell which one failed.
+- Recall@k, MRR [1] and nDCG [2] measure the retriever without any language model.
+- Faithfulness, answer relevance and context relevance can be scored automatically, as in RAGAS [3].
+- LLM judges agree with people often, but have known biases [4]; calibrate them with human labels [5].
+
+## Sources
+
+1. Voorhees, E. M. “The TREC-8 Question Answering Track Report.” TREC 1999. https://trec.nist.gov/pubs/trec8/papers/qa_report.pdf
+2. Järvelin, K., Kekäläinen, J. “Cumulated gain-based evaluation of IR techniques.” ACM Transactions on Information Systems 20(4), 2002. https://doi.org/10.1145/582415.582418
+3. Es, S., James, J., Espinosa-Anke, L., Schockaert, S. “RAGAS: Automated Evaluation of Retrieval Augmented Generation.” 2023. https://arxiv.org/abs/2309.15217
+4. Zheng, L., Chiang, W.-L., Sheng, Y., Zhuang, S., Wu, Z., Zhuang, Y., Lin, Z., Li, Z., Li, D., Xing, E. P., Zhang, H., Gonzalez, J. E., Stoica, I. “Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena.” NeurIPS 2023. https://arxiv.org/abs/2306.05685
+5. Saad-Falcon, J., Khattab, O., Potts, C., Zaharia, M. “ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems.” 2023. https://arxiv.org/abs/2311.09476

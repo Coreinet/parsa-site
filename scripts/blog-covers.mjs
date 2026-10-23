@@ -141,8 +141,50 @@ const identity = frame('/blog · discoverability', `
   <text x="1085" y="378" text-anchor="middle" ${mono} font-size="24" fill="${C.signal}">sameAs</text>
   <text x="80" y="850" ${sans} font-size="32" fill="${C.ink2}">One name, one identity, claims that link to evidence.</text>`);
 
+// 10. RAG evaluation: one test set, two separate checks.
+const ragEval = frame('/blog · rag evaluation', `
+  <text x="80" y="190" ${sans} font-size="40" font-weight="700" fill="${C.ink}">Evaluate retrieval and generation separately</text>
+  ${box(80, 420, 300, 150, 'Test set', 'questions + answers')}
+  ${box(520, 270, 440, 150, 'Retrieval', 'did the right chunks arrive?')}
+  ${box(520, 570, 440, 150, 'Generation', 'does the answer use them?', true)}
+  ${arrow(380, 470, 516, 350)}${arrow(380, 520, 516, 640)}${arrow(740, 420, 740, 566)}
+  ${box(1100, 270, 420, 150, 'recall@k · MRR', 'nDCG@k')}
+  ${box(1100, 570, 420, 150, 'faithfulness', 'answer relevance')}
+  ${arrow(960, 345, 1096, 345)}${arrow(960, 645, 1096, 645)}
+  <text x="80" y="830" ${sans} font-size="32" fill="${C.ink2}">Fix retrieval first: it sets the ceiling for every answer.</text>`);
+
+// 11. Quantization: weight memory of a 7B model by precision.
+const quantBars = [['16-bit', 14, false], ['8-bit', 7, false], ['4-bit', 3.5, true]];
+const quant = frame('/blog · quantization', `
+  <text x="80" y="190" ${sans} font-size="40" font-weight="700" fill="${C.ink}">Weight memory of a 7B-parameter model</text>
+  ${quantBars
+    .map(([name, v, accent], i) => {
+      const y = 290 + i * 160, w = (v / 14) * 1000;
+      return `<text x="80" y="${y + 60}" ${mono} font-size="36" fill="${C.ink}">${name}</text>
+      <rect x="300" y="${y + 10}" width="${w}" height="80" rx="14" fill="${accent ? C.signal : C.line}"/>
+      <text x="${300 + w + 24}" y="${y + 64}" ${sans} font-size="40" font-weight="700" fill="${accent ? C.signal : C.ink2}">${v} GB</text>`;
+    })
+    .join('')}
+  <text x="80" y="830" ${mono} font-size="26" fill="${C.ink3}">parameters × bytes per parameter · weights only</text>`);
+
+// 12. Name disambiguation: one name, three candidates, the linked one wins.
+const disamb = frame('/blog · entities', `
+  ${box(80, 390, 380, 140, '“Parsa Alizadeh”', 'a name is a string')}
+  ${box(700, 170, 420, 130, 'Person A', 'famous namesake')}
+  ${box(700, 395, 420, 130, 'Person B', 'thin context')}
+  ${box(700, 620, 420, 130, 'Person C', 'linked profiles', true)}
+  ${arrow(460, 430, 696, 240, true)}${arrow(460, 460, 696, 460, true)}${arrow(460, 490, 696, 680)}
+  ${['same name', 'same photo', 'links both ways', 'sameAs']
+    .map((t, i) => `<rect x="1210" y="${560 + i * 62}" width="300" height="48" rx="10" fill="${C.surface}" stroke="${C.signal}" stroke-width="2"/>
+      <text x="1236" y="${592 + i * 62}" ${mono} font-size="22" fill="${C.signal}">✓ ${t}</text>`)
+    .join('')}
+  <text x="80" y="850" ${sans} font-size="32" fill="${C.ink2}">Popularity decides when context is thin; consistent signals add context.</text>`);
+
 await mkdir('public/images/blog', { recursive: true });
 for (const [name, svg] of Object.entries({
+  'evaluating-rag-systems': ragEval,
+  'llm-quantization': quant,
+  'name-disambiguation-search-ai': disamb,
   'core-web-vitals-lcp': vitals,
   'structured-data-personal-website': graph,
   'reduced-motion-accessibility': motion,

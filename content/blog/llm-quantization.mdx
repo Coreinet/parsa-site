@@ -1,0 +1,116 @@
+---
+title: "Quantizing large language models: how 8-bit and 4-bit weights work"
+seoTitle: "LLM quantization explained: 8-bit and 4-bit"
+description: Why a 7-billion-parameter model needs 14 GB in 16-bit, how quantization shrinks it, why outliers make it hard, and what LLM.int8(), GPTQ, AWQ and QLoRA each changed.
+date: 2026-10-23
+category: ai
+tags: [ai, llm, quantization, inference, research]
+cover: /images/blog/llm-quantization.png
+coverAlt: Bar chart of the memory needed for the weights of a 7 billion parameter model, about 14 GB in 16-bit, 7 GB in 8-bit and 3.5 GB in 4-bit
+---
+
+A language model is mostly a very large list of numbers. Store each one in 16 bits and a 7-billion-parameter model needs about 14 GB just for its weights, more than most laptops and many GPUs have. Quantization stores those numbers with fewer bits, so the same model fits in a half or a quarter of the memory. This post explains how it works, why it is harder for large language models than it sounds, and what the main research methods changed.
+
+## The memory arithmetic
+
+Weight memory is the number of parameters times the bytes per parameter:
+
+```text
+7,000,000,000 × 2 bytes   (16-bit)  ≈ 14 GB
+7,000,000,000 × 1 byte    (8-bit)   ≈  7 GB
+7,000,000,000 × 0.5 bytes (4-bit)   ≈  3.5 GB
+```
+
+That is the weights only. Running the model also needs memory for activations and for the key-value cache that grows with the length of the conversation. Still, weights are usually the largest part, and they are what quantization shrinks.
+
+Memory is not the only gain. Generating text one token at a time is often limited by how fast weights can be read from memory, not by arithmetic. Smaller weights mean less data to move, which can make generation faster too [3].
+
+## How quantization works
+
+The simplest method is absmax quantization. Find the largest absolute value in a tensor, map it to the largest integer available, and scale everything else to match. For 8 bits the integers run from −127 to 127.
+
+```python title="absmax.py"
+import numpy as np
+
+def quantize(x, bits=8):
+    qmax = 2 ** (bits - 1) - 1          # 127 for 8 bits, 7 for 4 bits
+    scale = np.abs(x).max() / qmax      # one scale for the whole tensor
+    q = np.clip(np.round(x / scale), -qmax, qmax).astype(np.int8)
+    return q, scale
+
+def dequantize(q, scale):
+    return q.astype(np.float32) * scale
+
+rng = np.random.default_rng(0)
+w = rng.normal(0, 0.02, size=4096).astype(np.float32)
+
+q, s = quantize(w)
+print("error without outlier:", np.abs(w - dequantize(q, s)).mean())
+
+w[0] = 1.0                              # a single large value
+q, s = quantize(w)
+print("error with outlier:   ", np.abs(w - dequantize(q, s)).mean())
+```
+
+Run it and the second error is much larger. The one big value sets the scale, so the step between neighbouring integers becomes wide, and the thousands of small, ordinary weights get rounded coarsely. Most of them collapse onto just a few integer values.
+
+That is the central difficulty of quantization: **outliers**. Two standard defences are:
+
+- **Smaller groups.** Give each block of, say, 64 or 128 weights its own scale, so an outlier only damages its own block. Most 4-bit formats do this.
+- **Zero points.** Shift the range so it does not have to be centred on zero, which helps when values are mostly positive or mostly negative.
+
+## Outliers in large models: LLM.int8()
+
+Tim Dettmers and colleagues found that outliers in large language models are not random [1]. They appear in the activations, concentrated in a small number of feature dimensions, and they become systematic as models grow, with a sharp change at around 6.7 billion parameters [1]. Naive 8-bit quantization breaks down at that point.
+
+Their method, LLM.int8(), handles it with mixed-precision decomposition [1]. The few outlier dimensions are multiplied in 16-bit, and everything else, about 99.9% of the values, in 8-bit. With this, they ran models up to 175 billion parameters in 8-bit without performance degradation [1].
+
+## 4-bit weights: GPTQ and AWQ
+
+Going down to 4 bits needs more than rounding. Two methods are widely used.
+
+**GPTQ**, by Elias Frantar and colleagues, quantizes weights one column at a time and adjusts the remaining weights to compensate for the rounding error, using approximate second-order information about the layer [2]. It quantized 175-billion-parameter models to 3 or 4 bits in about four GPU hours, with negligible accuracy loss compared with the 16-bit model [2].
+
+**AWQ**, by Ji Lin and colleagues, starts from the observation that not all weights matter equally [3]. Protecting only about 1% of salient weights greatly reduces the error, and the salient ones are best found by looking at activation sizes, not weight sizes [3]. Instead of keeping those weights in higher precision, AWQ scales the important channels up before quantizing, which keeps the whole tensor in one format and needs no retraining [3].
+
+Both are **weight-only** methods: weights are stored in 4 bits and converted back to 16-bit for the multiplication. Quantizing activations as well is harder, because activation outliers change with every input. SmoothQuant, by Guangxuan Xiao and colleagues, addresses this by mathematically moving part of the difficulty from activations into the weights, which enables 8-bit weights and 8-bit activations together [4].
+
+## Fine-tuning a quantized model: QLoRA
+
+Quantization was first used only for inference. QLoRA, by Tim Dettmers and colleagues, made it possible to fine-tune on top of a 4-bit model [5]. The base model stays frozen in 4-bit, and small trainable low-rank adapters (LoRA) are added and trained in 16-bit [5].
+
+The paper introduced three pieces [5]:
+
+- **NF4 (4-bit NormalFloat):** a 4-bit data type whose levels are spaced for normally distributed weights, which is how trained weights are typically distributed.
+- **Double quantization:** the scales themselves are quantized, saving more memory.
+- **Paged optimizers:** optimizer state can move between GPU and CPU memory to survive memory spikes.
+
+With these, a 65-billion-parameter model could be fine-tuned on a single 48 GB GPU while matching the results of full 16-bit fine-tuning on the tasks tested [5].
+
+<Callout type="warning">
+Papers report quality on standard benchmarks. Your task may be more sensitive, especially for code, math or less common languages. Before switching to a quantized model, run your own evaluation on both versions and compare.
+</Callout>
+
+## Choosing in practice
+
+- **8-bit** is close to lossless for most models and halves memory [1].
+- **4-bit weight-only** (GPTQ, AWQ or a similar group-wise format) is the usual choice for running models locally, at a quarter of the 16-bit memory [2] [3].
+- **Below 4 bits** quality usually drops noticeably; test carefully.
+- **For fine-tuning on limited hardware**, QLoRA is the standard starting point [5].
+
+## Summary
+
+- Weight memory is parameters times bytes per parameter: about 14 GB, 7 GB and 3.5 GB for a 7B model in 16, 8 and 4 bits.
+- Quantization maps values to a small set of integers with a scale; outliers make the scale coarse.
+- LLM.int8() keeps the rare outlier dimensions in 16-bit [1]; GPTQ compensates for rounding error [2]; AWQ protects salient channels by scaling [3].
+- QLoRA trains small adapters on top of a frozen 4-bit model [5].
+
+For how these models compute in the first place, see [how transformer attention works](/blog/transformer-attention-explained).
+
+## Sources
+
+1. Dettmers, T., Lewis, M., Belkada, Y., Zettlemoyer, L. “LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale.” NeurIPS 2022. https://arxiv.org/abs/2208.07339
+2. Frantar, E., Ashkboos, S., Hoefler, T., Alistarh, D. “GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers.” ICLR 2023. https://arxiv.org/abs/2210.17323
+3. Lin, J., Tang, J., Tang, H., Yang, S., Chen, W.-M., Wang, W.-C., Xiao, G., Dang, X., Gan, C., Han, S. “AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration.” MLSys 2024. https://arxiv.org/abs/2306.00978
+4. Xiao, G., Lin, J., Seznec, M., Wu, H., Demouth, J., Han, S. “SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models.” ICML 2023. https://arxiv.org/abs/2211.10438
+5. Dettmers, T., Pagnoni, A., Holtzman, A., Zettlemoyer, L. “QLoRA: Efficient Finetuning of Quantized LLMs.” NeurIPS 2023. https://arxiv.org/abs/2305.14314

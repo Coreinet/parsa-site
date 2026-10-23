@@ -1,0 +1,78 @@
+---
+title: "Why search engines and AI assistants mix up people with the same name"
+seoTitle: "Why AI mixes up people with the same name"
+description: How entity linking decides which person a name refers to, why research finds language models weakest on less-known people, and what makes your own profiles easy to tell apart.
+date: 2026-10-23
+category: web
+tags: [seo, geo, entities, ai, research]
+cover: /images/blog/name-disambiguation-search-ai.png
+coverAlt: Diagram of name disambiguation, one name points to three candidate people, and the candidate whose profiles link to each other with the same photo and description is chosen
+---
+
+When I asked an AI assistant who I am, it found my website but linked a GitHub profile that belongs to someone else with the same name. That is not a rare glitch. Matching a name to the right person is a hard, well-studied problem, and both search engines and language models solve it with signals that favour people who are already well known. This post explains how that matching works, what research says about where it fails, and what you can do about it.
+
+## Strings and things
+
+A name is a string. A person is a thing. In 2012, Google described its Knowledge Graph with the phrase “things, not strings”: the goal was for search to understand which real-world entity a query refers to, not only which pages contain the words [1].
+
+The step that connects the two is called **entity linking**, or named entity disambiguation. Given a mention like “Parsa Alizadeh” on a page, the system has to decide which entity, if any, it refers to.
+
+## How entity linking decides
+
+The AIDA system by Johannes Hoffart and colleagues is a classic description of the problem [2]. It combines three kinds of evidence [2]:
+
+- **Prior probability:** how often this name refers to each candidate in general. A famous namesake has a high prior.
+- **Context similarity:** how well the words around the mention match what is known about each candidate.
+- **Coherence:** whether the candidate fits with the other entities on the same page. A mention near “React” and “Next.js” fits a software developer better than an athlete.
+
+The prior is the important part for anyone who is not famous. When the context is thin, the system falls back on popularity, and the better-known person with the same name wins.
+
+## Why language models struggle with less-known people
+
+Language models have a similar problem, measured directly in several studies.
+
+Nikhil Kandpal and colleagues found that a model's ability to answer a factual question is strongly tied to how many documents about that fact appeared in its training data [3]. Facts that appear rarely, the long tail, are answered much less accurately [3].
+
+Alex Mallen and colleagues reached the same conclusion with questions about entities of different popularity [4]. Models did well on popular entities and poorly on less popular ones, and retrieving relevant documents helped most exactly where the model's own memory was weakest [4].
+
+Biographies are a direct test. FActScore, by Sewon Min and colleagues, breaks generated biographies into individual facts and checks each one [5]. In their evaluation, ChatGPT's biographies had a factual precision of about 58%, and error rates were higher for rarer people [5].
+
+So for a person with a small online footprint, an assistant has little reliable memory and depends on what it retrieves. If a search for the name returns a namesake's GitHub profile, the assistant may attribute it to you.
+
+<Callout type="note">
+The research explains why mistakes happen; it does not give a recipe that guarantees a result. No markup or profile setting forces a search engine or an assistant to pick one person. What you can do is make the right answer easy to verify.
+</Callout>
+
+## Making yourself easy to tell apart
+
+Each step below adds context similarity or coherence, the two signals you control.
+
+**Use one name form everywhere.** The same spelling on your website, GitHub, LinkedIn and other profiles. If you also write your name in another script, such as Persian, publish both forms together so they are connected.
+
+**Use the same photo everywhere.** A consistent profile picture across sites is an easy match signal for people and for systems that compare images. A logo or a different photo on each site breaks the connection.
+
+**Link both ways.** Your website should link to each profile, and each profile should link back to your website. A one-way link is a claim; a link back is confirmation.
+
+**Say it in structured data.** The schema.org `sameAs` property is defined as the URL of a page that unambiguously indicates the item's identity [6]. Listing your profiles in `sameAs` on a Person entity tells search engines these pages are the same person. Google documents ProfilePage markup for pages about a single person [7]. There is a full walkthrough in [structured data for a personal website](/blog/structured-data-personal-website).
+
+**Add distinguishing context.** Your role, field and location near your name, in the same words on every profile. “Parsa Alizadeh, software developer, web, mobile and AI” gives a system something to match that a namesake does not share.
+
+**Publish things only you would publish.** Articles and projects under your name add documents that mention you together with your field. That is exactly the evidence the research above finds missing for less-known people [3] [4].
+
+For how all of this fits together on one site, see [building a site search engines understand](/blog/building-a-site-search-engines-understand), and for how AI answer engines choose sources, the [research on generative engine optimization](/blog/generative-engine-optimization-research).
+
+## Summary
+
+- Entity linking picks a person using popularity, context and coherence [2]; with thin context, the famous namesake wins.
+- Language models are least accurate about rarely mentioned people [3] [4] [5], so they rely on retrieval, which can surface a namesake.
+- You control context and coherence: one name, one photo, links in both directions, `sameAs` [6], consistent descriptions and your own published work.
+
+## Sources
+
+1. Singhal, A. “Introducing the Knowledge Graph: things, not strings.” Google, 2012. https://blog.google/products/search/introducing-knowledge-graph-things-not/
+2. Hoffart, J., Yosef, M. A., Bordino, I., Fürstenau, H., Pinkal, M., Spaniol, M., Taneva, B., Thater, S., Weikum, G. “Robust Disambiguation of Named Entities in Text.” EMNLP 2011. https://aclanthology.org/D11-1072/
+3. Kandpal, N., Deng, H., Roberts, A., Wallace, E., Raffel, C. “Large Language Models Struggle to Learn Long-Tail Knowledge.” ICML 2023. https://arxiv.org/abs/2211.08411
+4. Mallen, A., Asai, A., Zhong, V., Das, R., Khashabi, D., Hajishirzi, H. “When Not to Trust Language Models: Investigating Effectiveness of Parametric and Non-Parametric Memories.” ACL 2023. https://arxiv.org/abs/2212.10511
+5. Min, S., Krishna, K., Lyu, X., Lewis, M., Yih, W., Koh, P. W., Iyyer, M., Zettlemoyer, L., Hajishirzi, H. “FActScore: Fine-grained Atomic Evaluation of Factual Precision in Long Form Text Generation.” EMNLP 2023. https://arxiv.org/abs/2305.14251
+6. Schema.org. “sameAs.” https://schema.org/sameAs
+7. Google Search Central. “Profile page (ProfilePage) structured data.” https://developers.google.com/search/docs/appearance/structured-data/profile-page

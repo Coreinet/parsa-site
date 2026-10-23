@@ -21,7 +21,7 @@ export const topics: Topic[] = [
     definition:
       'AI engineering is the work of building software around machine learning models: retrieving the right information, understanding how the models work, and running them inside real products.',
     pillar: 'retrieval-augmented-generation',
-    supporting: ['transformer-attention-explained', 'vector-search-hnsw'],
+    supporting: ['transformer-attention-explained', 'vector-search-hnsw', 'evaluating-rag-systems', 'llm-quantization'],
     projects: []
   },
   {
@@ -39,7 +39,7 @@ export const topics: Topic[] = [
     definition:
       'Discoverability is how easily search engines and AI answer engines can find a website, understand who and what it is about, and cite it accurately.',
     pillar: 'building-a-site-search-engines-understand',
-    supporting: ['structured-data-personal-website', 'generative-engine-optimization-research'],
+    supporting: ['structured-data-personal-website', 'generative-engine-optimization-research', 'name-disambiguation-search-ai'],
     projects: []
   },
   {

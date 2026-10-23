@@ -5,6 +5,7 @@ import Mdx from '@/components/blog/Mdx';
 import Toc from '@/components/blog/Toc';
 import Gallery from '@/components/work/Gallery';
 import ProjectCover from '@/components/work/ProjectCover';
+import ProjectLinks from '@/components/work/ProjectLinks';
 import SpecSheet from '@/components/work/SpecSheet';
 import { Container, ExampleBadge, PathLabel } from '@/components/ui/primitives';
 import JsonLd from '@/components/seo/JsonLd';
@@ -78,14 +79,23 @@ export default async function ProjectPage(props: PageProps<'/work/[slug]'>) {
             {site.name}
           </Link>
         </p>
+        <ProjectLinks project={project} />
         <SpecSheet project={project} />
       </Container>
 
       <ProjectCover src={project.cover} alt={project.coverAlt ?? `${project.title}: ${project.summary}`} caption={`${project.title} · ${project.platform}`} />
 
       <Container className="grid grid-cols-[minmax(0,1fr)] gap-12 py-[clamp(56px,8vw,112px)] lg:grid-cols-[minmax(0,8fr)_minmax(0,3fr)] lg:gap-16">
-        <div className="prose min-w-0">
-          <Mdx source={project.body} />
+        <div className="grid min-w-0 content-start gap-10">
+          <div className="prose min-w-0">
+            <Mdx source={project.body} />
+          </div>
+          {project.links.live ? (
+            <div className="grid gap-4 rounded-md border border-line bg-surface p-6 sm:flex sm:items-center sm:justify-between">
+              <p className="text-body-lg font-semibold">See {project.title} live</p>
+              <ProjectLinks project={project} />
+            </div>
+          ) : null}
         </div>
         <aside className="hidden lg:block">
           <div className="sticky top-28 grid gap-6">
