@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { languageAlternates, LOCALES, localePath, type Locale } from '@/content/i18n';
 import { site } from '@/content/site';
 import { topics } from '@/content/topics';
-import { getArticles, getProjects, localesOf } from '@/lib/content';
+import { getArticle, getArticles, getProjects, localesOf } from '@/lib/content';
 import { absoluteUrl } from '@/lib/site-url';
 
 type Entry = MetadataRoute.Sitemap[number];
@@ -20,11 +20,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = latest ? { lastModified: latest } : {};
   const portrait = [absoluteUrl(site.portrait.src)];
 
-  /** One entry per language the page exists in, all pointing at each other. */
-  const everyLanguage = (path: string, entry: Omit<Entry, 'url'>, locales: readonly Locale[] = LOCALES): Entry[] => {
+  /** One entry per language the page exists in, all pointing at each other; `entry` may differ per language. */
+  const everyLanguage = (
+    path: string,
+    entry: Omit<Entry, 'url'> | ((locale: Locale) => Omit<Entry, 'url'>),
+    locales: readonly Locale[] = LOCALES
+  ): Entry[] => {
     const alternates = { languages: Object.fromEntries(Object.entries(languageAlternates(path, locales)).map(([lang, p]) => [lang, absoluteUrl(p)])) };
-    return locales.map(locale => ({ ...entry, url: absoluteUrl(localePath(locale, path)), alternates }));
+    return locales.map(locale => ({ ...(typeof entry === 'function' ? entry(locale) : entry), url: absoluteUrl(localePath(locale, path)), alternates }));
   };
+  // Each language's copy of an article has its own cover (public/images/blog/<lang>).
+  const coverOf = (slug: string, locale: Locale): string => getArticle(slug, locale)?.cover ?? `/images/blog/${slug}.png`;
 
   return [
     ...everyLanguage('/', { ...lastModified, changeFrequency: 'weekly', priority: 1, images: portrait }),
@@ -44,7 +50,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...articles.flatMap(a =>
       everyLanguage(
         `/blog/${a.slug}`,
-        { lastModified: a.updated ?? a.date, changeFrequency: 'monthly', priority: 0.8, images: [absoluteUrl(a.cover)] },
+        locale => ({ lastModified: a.updated ?? a.date, changeFrequency: 'monthly', priority: 0.8, images: [absoluteUrl(coverOf(a.slug, locale))] }),
         localesOf('blog', a.slug)
       )
     )

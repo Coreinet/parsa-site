@@ -1,12 +1,14 @@
 // Cover images for the blog, drawn as diagrams of each article's content.
-// Run: node scripts/blog-covers.mjs  → public/images/blog/*.png (1600×900)
+// Run: node scripts/blog-covers.mjs  → public/images/blog/*.png (1600×900),
+// plus Persian and Turkish copies in public/images/blog/fa and /tr (text from cover-text.mjs).
 import sharp from 'sharp';
 import { mkdir } from 'node:fs/promises';
+import { coverText } from './cover-text.mjs';
 
 const W = 1600, H = 900;
 const C = { paper: '#F1F2EE', paper2: '#E7E9E3', surface: '#FAFAF7', line: '#C9CDC5', ink: '#121416', ink2: '#4A4F55', ink3: '#6E747A', signal: '#2A36E8', soft: '#DDE0FF', ok: '#1E7F4F' };
-const sans = 'font-family="Helvetica, Arial, sans-serif"';
-const mono = 'font-family="Consolas, Menlo, monospace"';
+const sans = 'font-family="Helvetica, Arial, Segoe UI, Tahoma, sans-serif"';
+const mono = 'font-family="Consolas, Menlo, Segoe UI, Tahoma, monospace"';
 
 const frame = (label, body) => `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${C.ink2}"/></marker></defs>
@@ -180,8 +182,23 @@ const disamb = frame('/blog · entities', `
     .join('')}
   <text x="80" y="850" ${sans} font-size="32" fill="${C.ink2}">Popularity decides when context is thin; consistent signals add context.</text>`);
 
-await mkdir('public/images/blog', { recursive: true });
-for (const [name, svg] of Object.entries({
+/**
+ * The same diagram in another language: each text node found in `text` is swapped for its
+ * translation. Persian text runs right to left with its block kept where the English one was:
+ * with direction="rtl", "end" puts the left edge at x and "start" the right edge.
+ */
+const localize = (svg, text, rtl) =>
+  svg.replace(/<text([^>]*)>([^<]+)<\/text>/g, (whole, attrs, content) => {
+    const translated = text[content.trim()];
+    if (!translated) return whole;
+    if (!rtl) return `<text${attrs}>${translated}</text>`;
+    const anchor = /text-anchor="(\w+)"/.exec(attrs)?.[1] ?? 'start';
+    const flipped = { start: 'end', middle: 'middle', end: 'start' }[anchor];
+    const rest = attrs.replace(/\s*text-anchor="\w+"/, '');
+    return `<text${rest} text-anchor="${flipped}" direction="rtl">${translated}</text>`;
+  });
+
+const covers = {
   'evaluating-rag-systems': ragEval,
   'llm-quantization': quant,
   'name-disambiguation-search-ai': disamb,
@@ -194,7 +211,12 @@ for (const [name, svg] of Object.entries({
   'vector-search-hnsw': hnsw,
   'react-native-new-architecture': rn,
   'building-a-site-search-engines-understand': identity
-})) {
-  await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(`public/images/blog/${name}.png`);
-  console.log('wrote', name);
+};
+
+for (const [dir, text, rtl] of [['public/images/blog', null, false], ['public/images/blog/fa', coverText.fa, true], ['public/images/blog/tr', coverText.tr, false]]) {
+  await mkdir(dir, { recursive: true });
+  for (const [name, svg] of Object.entries(covers)) {
+    await sharp(Buffer.from(text ? localize(svg, text, rtl) : svg)).png({ compressionLevel: 9 }).toFile(`${dir}/${name}.png`);
+  }
+  console.log('wrote', Object.keys(covers).length, 'covers to', dir);
 }
